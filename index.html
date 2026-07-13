@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#004883" />
+  <title>Política de Viagens | Lucena Infraestrutura</title>
+
+  <style>
+    :root{
+      --blue:#004883;
+      --blue-dark:#00345f;
+      --white:#ffffff;
+      --shadow:0 24px 70px rgba(0,0,0,.34);
+    }
+
+    *{box-sizing:border-box}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden}
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--blue);
+      color:#fff;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    .app{
+      width:100%;
+      height:100%;
+      min-height:100dvh;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      background:var(--blue);
+    }
+
+    .topbar{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      padding:10px clamp(12px,3vw,28px);
+      background:var(--blue);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brand-mark{
+      width:8px;
+      height:30px;
+      border-radius:10px;
+      background:#ef3340;
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      line-height:1.05;
+      min-width:0;
+    }
+
+    .brand-text strong{
+      display:block;
+      font-size:clamp(14px,2vw,18px);
+      letter-spacing:.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .brand-text span{
+      display:block;
+      margin-top:3px;
+      font-size:11px;
+      opacity:.76;
+      white-space:nowrap;
+    }
+
+    .status{
+      font-size:12px;
+      opacity:.8;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .stage{
+      position:relative;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px clamp(8px,2vw,24px);
+      overflow:hidden;
+      background:var(--blue);
+    }
+
+    #book{
+      filter:drop-shadow(0 22px 28px rgba(0,0,0,.34));
+    }
+
+    .page{
+      background:#fff;
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
+    }
+
+    .page canvas{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:contain;
+      background:#fff;
+    }
+
+    .cover-page{
+      background:#fff;
+    }
+
+    .loader{
+      position:absolute;
+      inset:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--blue);
+      transition:opacity .25s ease, visibility .25s ease;
+    }
+
+    .loader.hidden{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .loader-card{
+      width:min(420px,88vw);
+      text-align:center;
+    }
+
+    .spinner{
+      width:48px;
+      height:48px;
+      margin:0 auto 18px;
+      border:4px solid rgba(255,255,255,.25);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .loader-title{
+      font-weight:700;
+      font-size:18px;
+      margin-bottom:8px;
+    }
+
+    .loader-message{
+      font-size:13px;
+      line-height:1.45;
+      opacity:.82;
+    }
+
+    .error-box{
+      display:none;
+      position:absolute;
+      z-index:30;
+      width:min(620px,92vw);
+      padding:24px;
+      border-radius:18px;
+      background:rgba(0,39,73,.97);
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .error-box.show{display:block}
+    .error-box h2{margin:0 0 10px;font-size:21px}
+    .error-box p{margin:8px 0;line-height:1.5;font-size:14px}
+    .error-box code{
+      display:inline-block;
+      padding:3px 7px;
+      border-radius:6px;
+      background:rgba(255,255,255,.13);
+      color:#fff;
+    }
+
+    .toolbar{
+      min-height:70px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:var(--blue);
+    }
+
+    .tool-btn{
+      height:42px;
+      min-width:42px;
+      padding:0 14px;
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:12px;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      font:inherit;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      transition:background .18s ease, transform .18s ease;
+    }
+
+    .tool-btn:hover{background:rgba(255,255,255,.16)}
+    .tool-btn:active{transform:scale(.97)}
+    .tool-btn:disabled{opacity:.35;cursor:not-allowed}
+
+    .page-counter{
+      min-width:100px;
+      height:42px;
+      padding:0 12px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.14);
+      font-weight:700;
+      font-size:13px;
+      letter-spacing:.02em;
+    }
+
+    .desktop-label{display:inline}
+
+    @media (max-width:720px){
+      .topbar{min-height:50px}
+      .brand-text span,.status,.desktop-label{display:none}
+      .toolbar{gap:6px}
+      .tool-btn{padding:0 11px}
+      .stage{padding:5px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-text">
+          <strong id="documentTitle">Política de Viagens</strong>
+          <span>Lucena Infraestrutura</span>
+        </div>
+      </div>
+      <div class="status" id="fileStatus">Localizando o PDF...</div>
+    </header>
+
+    <section class="stage" id="stage">
+      <div id="book"></div>
+
+      <div class="loader" id="loader">
+        <div class="loader-card">
+          <div class="spinner"></div>
+          <div class="loader-title">Preparando o livreto</div>
+          <div class="loader-message" id="loaderMessage">
+            Localizando e processando o arquivo PDF...
+          </div>
+        </div>
+      </div>
+
+      <div class="error-box" id="errorBox">
+        <h2>Não foi possível abrir o livreto</h2>
+        <p id="errorMessage"></p>
+        <p>
+          Coloque um PDF na mesma pasta do <code>index.html</code> ou defina o nome no arquivo
+          <code>config.js</code>.
+        </p>
+      </div>
+    </section>
+
+    <footer class="toolbar">
+      <button class="tool-btn" id="firstBtn" title="Primeira página">⏮</button>
+      <button class="tool-btn" id="prevBtn" title="Página anterior">← <span class="desktop-label">Anterior</span></button>
+      <div class="page-counter" id="pageCounter">0 / 0</div>
+      <button class="tool-btn" id="nextBtn" title="Próxima página"><span class="desktop-label">Próxima</span> →</button>
+      <button class="tool-btn" id="lastBtn" title="Última página">⏭</button>
+      <button class="tool-btn" id="fullscreenBtn" title="Tela cheia">⛶</button>
+    </footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const CONFIG = Object.assign({
+        pdf: '',
+        title: 'Política de Viagens',
+        autoDetectGitHubPdf: true,
+        renderScale: 1.75,
+        maxCanvasPixels: 8500000
+      }, window.FLIPBOOK_CONFIG || {});
+
+      const loader = document.getElementById('loader');
+      const loaderMessage = document.getElementById('loaderMessage');
+      const errorBox = document.getElementById('errorBox');
+      const errorMessage = document.getElementById('errorMessage');
+      const fileStatus = document.getElementById('fileStatus');
+      const titleEl = document.getElementById('documentTitle');
+      const bookEl = document.getElementById('book');
+      const stageEl = document.getElementById('stage');
+      const pageCounter = document.getElementById('pageCounter');
+
+      const firstBtn = document.getElementById('firstBtn');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const lastBtn = document.getElementById('lastBtn');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+      let pageFlip = null;
+      let totalPages = 0;
+      let currentPdfUrl = '';
+      let pageRatio = 1.4142;
+      let resizeTimer = null;
+
+      titleEl.textContent = CONFIG.title || 'Política de Viagens';
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+      function setLoading(message){
+        loaderMessage.textContent = message;
+      }
+
+      function showError(message){
+        loader.classList.add('hidden');
+        errorMessage.textContent = message;
+        errorBox.classList.add('show');
+        fileStatus.textContent = 'PDF não localizado';
+      }
+
+      function getQueryPdf(){
+        const params = new URLSearchParams(location.search);
+        return params.get('pdf') || '';
+      }
+
+      function isGitHubPages(){
+        return /\.github\.io$/i.test(location.hostname);
+      }
+
+      function deriveGitHubRepo(){
+        if (!isGitHubPages()) return null;
+
+        const owner = location.hostname.split('.')[0];
+        const parts = location.pathname.split('/').filter(Boolean);
+
+        if (parts.length === 0){
+          return { owner, repo: owner + '.github.io', folder: '' };
+        }
+
+        return {
+          owner,
+          repo: parts[0],
+          folder: parts.slice(1).join('/')
+        };
+      }
+
+      async function detectPdfUsingGitHubApi(){
+        const info = deriveGitHubRepo();
+        if (!info) return '';
+
+        const cleanFolder = info.folder.replace(/\/index\.html$/i, '');
+        const apiUrl =
+          `https://api.github.com/repos/${encodeURIComponent(info.owner)}/` +
+          `${encodeURIComponent(info.repo)}/contents/${cleanFolder}`;
+
+        try{
+          const response = await fetch(apiUrl, {
+            headers: { 'Accept': 'application/vnd.github+json' }
+          });
+
+          if (!response.ok) return '';
+
+          const items = await response.json();
+          if (!Array.isArray(items)) return '';
+
+          const pdfs = items
+            .filter(item => item.type === 'file' && /\.pdf$/i.test(item.name))
+            .sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+          if (!pdfs.length) return '';
+
+          return pdfs[0].download_url || pdfs[0].path;
+        }catch{
+          return '';
+        }
+      }
+
+      async function urlExists(url){
+        try{
+          const response = await fetch(url, { method:'HEAD', cache:'no-store' });
+          return response.ok;
+        }catch{
+          return false;
+        }
+      }
+
+      async function findPdf(){
+        const queryPdf = getQueryPdf();
+        if (queryPdf) return queryPdf;
+
+        if (CONFIG.pdf) return CONFIG.pdf;
+
+        if (CONFIG.autoDetectGitHubPdf){
+          setLoading('Procurando o PDF publicado na pasta do GitHub...');
+          const detected = await detectPdfUsingGitHubApi();
+          if (detected) return detected;
+        }
+
+        const fallbacks = [
+          'documento.pdf',
+          'politica.pdf',
+          'arquivo.pdf',
+          'livreto.pdf'
+        ];
+
+        for (const name of fallbacks){
+          setLoading(`Procurando ${name}...`);
+          if (await urlExists(name)) return name;
+        }
+
+        return '';
+      }
+
+      function calculateBookSize(){
+        const sw = stageEl.clientWidth;
+        const sh = stageEl.clientHeight;
+        const mobile = sw < 760;
+
+        let pageHeight = Math.max(300, sh - 12);
+        let pageWidth = pageHeight / pageRatio;
+
+        const spreadWidth = mobile ? pageWidth : pageWidth * 2;
+
+        if (spreadWidth > sw - 12){
+          pageWidth = (sw - 12) / (mobile ? 1 : 2);
+          pageHeight = pageWidth * pageRatio;
+        }
+
+        return {
+          width: Math.max(220, Math.floor(pageWidth)),
+          height: Math.max(300, Math.floor(pageHeight)),
+          mobile
+        };
+      }
+
+      function getSafeRenderScale(viewport){
+        const requested = Number(CONFIG.renderScale) || 1.75;
+        const pixels = viewport.width * viewport.height * requested * requested;
+        if (pixels <= CONFIG.maxCanvasPixels) return requested;
+        return Math.sqrt(CONFIG.maxCanvasPixels / (viewport.width * viewport.height));
+      }
+
+      async function renderPages(pdf){
+        const first = await pdf.getPage(1);
+        const firstViewport = first.getViewport({ scale:1 });
+        pageRatio = firstViewport.height / firstViewport.width;
+
+        const fragment = document.createDocumentFragment();
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++){
+          setLoading(`Preparando página ${pageNumber} de ${pdf.numPages}...`);
+
+          const page = pageNumber === 1 ? first : await pdf.getPage(pageNumber);
+          const baseViewport = page.getViewport({ scale:1 });
+          const scale = getSafeRenderScale(baseViewport);
+          const viewport = page.getViewport({ scale });
+
+          const pageDiv = document.createElement('div');
+          pageDiv.className = 'page' + (pageNumber === 1 ? ' cover-page' : '');
+          pageDiv.dataset.density = pageNumber === 1 || pageNumber === pdf.numPages ? 'hard' : 'soft';
+
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d', { alpha:false });
+
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          canvas.setAttribute('aria-label', `Página ${pageNumber}`);
+
+          context.fillStyle = '#ffffff';
+          context.fillRect(0,0,canvas.width,canvas.height);
+
+          await page.render({
+            canvasContext: context,
+            viewport,
+            background:'#ffffff'
+          }).promise;
+
+          pageDiv.appendChild(canvas);
+          fragment.appendChild(pageDiv);
+
+          if (pageNumber % 3 === 0){
+            await new Promise(resolve => requestAnimationFrame(resolve));
+          }
+        }
+
+        bookEl.replaceChildren(fragment);
+      }
+
+      function updateCounter(index){
+        const pageNumber = Math.min(totalPages, index + 1);
+        pageCounter.textContent = `${pageNumber} / ${totalPages}`;
+        firstBtn.disabled = index <= 0;
+        prevBtn.disabled = index <= 0;
+        nextBtn.disabled = index >= totalPages - 1;
+        lastBtn.disabled = index >= totalPages - 1;
+      }
+
+      function initFlipbook(){
+        const size = calculateBookSize();
+
+        pageFlip = new St.PageFlip(bookEl, {
+          width: size.width,
+          height: size.height,
+          size: 'stretch',
+          minWidth: 220,
+          maxWidth: size.width,
+          minHeight: 300,
+          maxHeight: size.height,
+          showCover: true,
+          usePortrait: true,
+          mobileScrollSupport: false,
+          maxShadowOpacity: 0.35,
+          flippingTime: 720,
+          drawShadow: true,
+          autoSize: true,
+          clickEventForward: true,
+          useMouseEvents: true,
+          swipeDistance: 22,
+          showPageCorners: true,
+          disableFlipByClick: false
+        });
+
+        pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+        totalPages = pageFlip.getPageCount();
+
+        pageFlip.on('flip', event => updateCounter(event.data));
+        pageFlip.on('changeOrientation', () => {
+          updateCounter(pageFlip.getCurrentPageIndex());
+        });
+
+        updateCounter(0);
+      }
+
+      function bindControls(){
+        firstBtn.addEventListener('click', () => pageFlip && pageFlip.turnToPage(0));
+        prevBtn.addEventListener('click', () => pageFlip && pageFlip.flipPrev());
+        nextBtn.addEventListener('click', () => pageFlip && pageFlip.flipNext());
+        lastBtn.addEventListener('click', () => pageFlip && pageFlip.turnToPage(totalPages - 1));
+
+        fullscreenBtn.addEventListener('click', async () => {
+          try{
+            if (!document.fullscreenElement){
+              await document.documentElement.requestFullscreen();
+            }else{
+              await document.exitFullscreen();
+            }
+          }catch{}
+        });
+
+        document.addEventListener('keydown', event => {
+          if (!pageFlip) return;
+          if (event.key === 'ArrowLeft') pageFlip.flipPrev();
+          if (event.key === 'ArrowRight') pageFlip.flipNext();
+          if (event.key === 'Home') pageFlip.turnToPage(0);
+          if (event.key === 'End') pageFlip.turnToPage(totalPages - 1);
+        });
+
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            if (pageFlip) pageFlip.update();
+          }, 180);
+        });
+      }
+
+      async function start(){
+        try{
+          bindControls();
+
+          const pdfUrl = await findPdf();
+          if (!pdfUrl){
+            showError(
+              'Nenhum arquivo PDF foi encontrado automaticamente nesta pasta.'
+            );
+            return;
+          }
+
+          currentPdfUrl = pdfUrl;
+          const fileName = decodeURIComponent(pdfUrl.split('/').pop().split('?')[0]);
+          fileStatus.textContent = fileName;
+
+          setLoading('Abrindo o PDF...');
+          const loadingTask = pdfjsLib.getDocument({
+            url: pdfUrl,
+            cMapPacked: true,
+            disableAutoFetch: false,
+            disableStream: false
+          });
+
+          const pdf = await loadingTask.promise;
+          totalPages = pdf.numPages;
+
+          setLoading(`Convertendo ${pdf.numPages} páginas para o livreto...`);
+          await renderPages(pdf);
+
+          setLoading('Montando a animação das páginas...');
+          initFlipbook();
+
+          loader.classList.add('hidden');
+        }catch(error){
+          console.error(error);
+          showError(
+            'O arquivo foi localizado, mas não pôde ser processado. Verifique se o PDF está íntegro e se o site foi aberto pelo GitHub Pages.'
+          );
+        }
+      }
+
+      start();
+    })();
+  </script>
+</body>
+</html>
