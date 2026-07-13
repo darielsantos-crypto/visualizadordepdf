@@ -4,21 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#004883" />
-  <title>Política de Viagens | Lucena Infraestrutura</title>
+  <title>Visualizador de PDF | Lucena Infraestrutura</title>
 
   <style>
     :root{
-      --blue:#004883;
-      --blue-dark:#00345f;
-      --white:#ffffff;
-      --shadow:0 24px 70px rgba(0,0,0,.34);
+      --azul:#004883;
+      --azul-escuro:#00345f;
+      --branco:#ffffff;
+      --vermelho:#ef3340;
+      --sombra:0 28px 70px rgba(0,0,0,.34);
     }
 
     *{box-sizing:border-box}
-    html,body{width:100%;height:100%;margin:0;overflow:hidden}
-    body{
+
+    html,body{
+      width:100%;
+      height:100%;
+      margin:0;
+      overflow:hidden;
+      background:var(--azul);
       font-family:Arial,Helvetica,sans-serif;
-      background:var(--blue);
+    }
+
+    body{
       color:#fff;
       user-select:none;
       -webkit-tap-highlight-color:transparent;
@@ -30,115 +38,111 @@
       min-height:100dvh;
       display:grid;
       grid-template-rows:auto 1fr auto;
-      background:var(--blue);
+      background:var(--azul);
     }
 
-    .topbar{
+    .topo{
       min-height:58px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:14px;
+      gap:16px;
       padding:10px clamp(12px,3vw,28px);
-      background:var(--blue);
+      background:var(--azul);
     }
 
-    .brand{
+    .marca{
       display:flex;
       align-items:center;
       gap:10px;
       min-width:0;
     }
 
-    .brand-mark{
+    .marca-barra{
       width:8px;
       height:30px;
       border-radius:10px;
-      background:#ef3340;
+      background:var(--vermelho);
       flex:0 0 auto;
     }
 
-    .brand-text{
-      line-height:1.05;
+    .marca-texto{
       min-width:0;
+      line-height:1.05;
     }
 
-    .brand-text strong{
+    .marca-texto strong{
       display:block;
       font-size:clamp(14px,2vw,18px);
-      letter-spacing:.02em;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
 
-    .brand-text span{
+    .marca-texto span{
       display:block;
-      margin-top:3px;
+      margin-top:4px;
       font-size:11px;
-      opacity:.76;
-      white-space:nowrap;
+      opacity:.75;
     }
 
-    .status{
+    .arquivo-atual{
+      max-width:42vw;
       font-size:12px;
-      opacity:.8;
-      text-align:right;
+      opacity:.82;
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-align:right;
     }
 
-    .stage{
+    .palco{
       position:relative;
       min-height:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:8px clamp(8px,2vw,24px);
       overflow:hidden;
-      background:var(--blue);
+      padding:8px clamp(6px,2vw,22px);
+      background:var(--azul);
     }
 
-    #book{
-      filter:drop-shadow(0 22px 28px rgba(0,0,0,.34));
+    #livro{
+      filter:drop-shadow(0 24px 28px rgba(0,0,0,.34));
     }
 
-    .page{
+    .pagina{
       background:#fff;
       overflow:hidden;
       box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
     }
 
-    .page canvas{
+    .pagina canvas{
       width:100%;
       height:100%;
       display:block;
-      object-fit:contain;
       background:#fff;
     }
 
-    .cover-page{
-      background:#fff;
-    }
-
-    .loader{
+    .carregamento{
       position:absolute;
       inset:0;
       z-index:20;
       display:flex;
       align-items:center;
       justify-content:center;
-      background:var(--blue);
+      background:var(--azul);
       transition:opacity .25s ease, visibility .25s ease;
     }
 
-    .loader.hidden{
+    .carregamento.oculto{
       opacity:0;
       visibility:hidden;
       pointer-events:none;
     }
 
-    .loader-card{
-      width:min(420px,88vw);
+    .carregamento-conteudo{
+      width:min(440px,88vw);
       text-align:center;
     }
 
@@ -149,39 +153,51 @@
       border:4px solid rgba(255,255,255,.25);
       border-top-color:#fff;
       border-radius:50%;
-      animation:spin .8s linear infinite;
+      animation:girar .8s linear infinite;
     }
 
-    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes girar{
+      to{transform:rotate(360deg)}
+    }
 
-    .loader-title{
+    .carregamento-titulo{
+      font-size:19px;
       font-weight:700;
-      font-size:18px;
       margin-bottom:8px;
     }
 
-    .loader-message{
+    .carregamento-mensagem{
       font-size:13px;
       line-height:1.45;
       opacity:.82;
     }
 
-    .error-box{
+    .erro{
       display:none;
       position:absolute;
       z-index:30;
-      width:min(620px,92vw);
-      padding:24px;
+      width:min(660px,92vw);
+      padding:26px;
       border-radius:18px;
-      background:rgba(0,39,73,.97);
-      box-shadow:var(--shadow);
+      background:rgba(0,39,73,.98);
+      box-shadow:var(--sombra);
       text-align:center;
     }
 
-    .error-box.show{display:block}
-    .error-box h2{margin:0 0 10px;font-size:21px}
-    .error-box p{margin:8px 0;line-height:1.5;font-size:14px}
-    .error-box code{
+    .erro.visivel{display:block}
+
+    .erro h2{
+      margin:0 0 12px;
+      font-size:22px;
+    }
+
+    .erro p{
+      margin:8px 0;
+      line-height:1.5;
+      font-size:14px;
+    }
+
+    .erro code{
       display:inline-block;
       padding:3px 7px;
       border-radius:6px;
@@ -189,17 +205,17 @@
       color:#fff;
     }
 
-    .toolbar{
+    .barra{
       min-height:70px;
       display:flex;
       align-items:center;
       justify-content:center;
       gap:8px;
       padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      background:var(--blue);
+      background:var(--azul);
     }
 
-    .tool-btn{
+    .botao{
       height:42px;
       min-width:42px;
       padding:0 14px;
@@ -216,12 +232,12 @@
       transition:background .18s ease, transform .18s ease;
     }
 
-    .tool-btn:hover{background:rgba(255,255,255,.16)}
-    .tool-btn:active{transform:scale(.97)}
-    .tool-btn:disabled{opacity:.35;cursor:not-allowed}
+    .botao:hover{background:rgba(255,255,255,.16)}
+    .botao:active{transform:scale(.97)}
+    .botao:disabled{opacity:.35;cursor:not-allowed}
 
-    .page-counter{
-      min-width:100px;
+    .contador{
+      min-width:104px;
       height:42px;
       padding:0 12px;
       border-radius:12px;
@@ -229,315 +245,367 @@
       align-items:center;
       justify-content:center;
       background:rgba(0,0,0,.14);
-      font-weight:700;
       font-size:13px;
+      font-weight:700;
       letter-spacing:.02em;
     }
 
-    .desktop-label{display:inline}
+    .rotulo-desktop{display:inline}
 
     @media (max-width:720px){
-      .topbar{min-height:50px}
-      .brand-text span,.status,.desktop-label{display:none}
-      .toolbar{gap:6px}
-      .tool-btn{padding:0 11px}
-      .stage{padding:5px}
+      .topo{min-height:50px}
+      .marca-texto span,
+      .arquivo-atual,
+      .rotulo-desktop{display:none}
+      .barra{gap:6px}
+      .botao{padding:0 11px}
+      .palco{padding:4px}
     }
   </style>
 </head>
 
 <body>
   <main class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark"></div>
-        <div class="brand-text">
-          <strong id="documentTitle">Política de Viagens</strong>
+    <header class="topo">
+      <div class="marca">
+        <div class="marca-barra"></div>
+        <div class="marca-texto">
+          <strong>Política de Viagens</strong>
           <span>Lucena Infraestrutura</span>
         </div>
       </div>
-      <div class="status" id="fileStatus">Localizando o PDF...</div>
+
+      <div class="arquivo-atual" id="arquivoAtual">
+        Localizando o PDF...
+      </div>
     </header>
 
-    <section class="stage" id="stage">
-      <div id="book"></div>
+    <section class="palco" id="palco">
+      <div id="livro"></div>
 
-      <div class="loader" id="loader">
-        <div class="loader-card">
+      <div class="carregamento" id="carregamento">
+        <div class="carregamento-conteudo">
           <div class="spinner"></div>
-          <div class="loader-title">Preparando o livreto</div>
-          <div class="loader-message" id="loaderMessage">
-            Localizando e processando o arquivo PDF...
+          <div class="carregamento-titulo">Preparando o livreto</div>
+          <div class="carregamento-mensagem" id="mensagemCarregamento">
+            Localizando o PDF publicado na pasta <strong>/pdf</strong>...
           </div>
         </div>
       </div>
 
-      <div class="error-box" id="errorBox">
+      <div class="erro" id="erro">
         <h2>Não foi possível abrir o livreto</h2>
-        <p id="errorMessage"></p>
+        <p id="mensagemErro"></p>
         <p>
-          Coloque um PDF na mesma pasta do <code>index.html</code> ou defina o nome no arquivo
-          <code>config.js</code>.
+          Confirme se existe pelo menos um arquivo PDF na pasta
+          <code>/pdf</code> do repositório.
         </p>
       </div>
     </section>
 
-    <footer class="toolbar">
-      <button class="tool-btn" id="firstBtn" title="Primeira página">⏮</button>
-      <button class="tool-btn" id="prevBtn" title="Página anterior">← <span class="desktop-label">Anterior</span></button>
-      <div class="page-counter" id="pageCounter">0 / 0</div>
-      <button class="tool-btn" id="nextBtn" title="Próxima página"><span class="desktop-label">Próxima</span> →</button>
-      <button class="tool-btn" id="lastBtn" title="Última página">⏭</button>
-      <button class="tool-btn" id="fullscreenBtn" title="Tela cheia">⛶</button>
+    <footer class="barra">
+      <button class="botao" id="primeira" title="Primeira página">⏮</button>
+      <button class="botao" id="anterior" title="Página anterior">← <span class="rotulo-desktop">Anterior</span></button>
+      <div class="contador" id="contador">0 / 0</div>
+      <button class="botao" id="proxima" title="Próxima página"><span class="rotulo-desktop">Próxima</span> →</button>
+      <button class="botao" id="ultima" title="Última página">⏭</button>
+      <button class="botao" id="telaCheia" title="Tela cheia">⛶</button>
     </footer>
   </main>
 
-  <script src="config.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 
   <script>
     (() => {
-      'use strict';
+      "use strict";
 
-      const CONFIG = Object.assign({
-        pdf: '',
-        title: 'Política de Viagens',
-        autoDetectGitHubPdf: true,
-        renderScale: 1.75,
-        maxCanvasPixels: 8500000
-      }, window.FLIPBOOK_CONFIG || {});
+      const GITHUB_USUARIO = "darielsantos-crypto";
+      const GITHUB_REPOSITORIO = "visualizadordepdf";
+      const GITHUB_BRANCH = "main";
+      const GITHUB_PASTA_PDF = "pdf";
 
-      const loader = document.getElementById('loader');
-      const loaderMessage = document.getElementById('loaderMessage');
-      const errorBox = document.getElementById('errorBox');
-      const errorMessage = document.getElementById('errorMessage');
-      const fileStatus = document.getElementById('fileStatus');
-      const titleEl = document.getElementById('documentTitle');
-      const bookEl = document.getElementById('book');
-      const stageEl = document.getElementById('stage');
-      const pageCounter = document.getElementById('pageCounter');
+      const PDF_PADRAO = "POLÍTICA DE VIAGEM 2026.pdf";
 
-      const firstBtn = document.getElementById('firstBtn');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      const lastBtn = document.getElementById('lastBtn');
-      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const CONFIG = {
+        escalaRenderizacao: 1.8,
+        maximoPixelsCanvas: 9000000,
+        tempoVirada: 720
+      };
+
+      const carregamento = document.getElementById("carregamento");
+      const mensagemCarregamento = document.getElementById("mensagemCarregamento");
+      const erro = document.getElementById("erro");
+      const mensagemErro = document.getElementById("mensagemErro");
+      const arquivoAtual = document.getElementById("arquivoAtual");
+      const palco = document.getElementById("palco");
+      const livro = document.getElementById("livro");
+      const contador = document.getElementById("contador");
+
+      const primeira = document.getElementById("primeira");
+      const anterior = document.getElementById("anterior");
+      const proxima = document.getElementById("proxima");
+      const ultima = document.getElementById("ultima");
+      const telaCheia = document.getElementById("telaCheia");
 
       let pageFlip = null;
-      let totalPages = 0;
-      let currentPdfUrl = '';
-      let pageRatio = 1.4142;
-      let resizeTimer = null;
+      let totalPaginas = 0;
+      let proporcaoPagina = 1.4142;
 
-      titleEl.textContent = CONFIG.title || 'Política de Viagens';
       pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-      function setLoading(message){
-        loaderMessage.textContent = message;
+      function atualizarMensagem(texto){
+        mensagemCarregamento.textContent = texto;
       }
 
-      function showError(message){
-        loader.classList.add('hidden');
-        errorMessage.textContent = message;
-        errorBox.classList.add('show');
-        fileStatus.textContent = 'PDF não localizado';
+      function mostrarErro(texto){
+        carregamento.classList.add("oculto");
+        mensagemErro.textContent = texto;
+        erro.classList.add("visivel");
+        arquivoAtual.textContent = "PDF não localizado";
       }
 
-      function getQueryPdf(){
+      function parametroPdf(){
         const params = new URLSearchParams(location.search);
-        return params.get('pdf') || '';
+        return params.get("pdf") || "";
       }
 
-      function isGitHubPages(){
-        return /\.github\.io$/i.test(location.hostname);
+      function caminhoPdfLocal(nome){
+        return `${GITHUB_PASTA_PDF}/${encodeURIComponent(nome)}`;
       }
 
-      function deriveGitHubRepo(){
-        if (!isGitHubPages()) return null;
+      async function localizarPdf(){
+        const informadoNaUrl = parametroPdf();
 
-        const owner = location.hostname.split('.')[0];
-        const parts = location.pathname.split('/').filter(Boolean);
-
-        if (parts.length === 0){
-          return { owner, repo: owner + '.github.io', folder: '' };
+        if (informadoNaUrl){
+          return {
+            nome: informadoNaUrl,
+            url: caminhoPdfLocal(informadoNaUrl)
+          };
         }
 
-        return {
-          owner,
-          repo: parts[0],
-          folder: parts.slice(1).join('/')
-        };
-      }
-
-      async function detectPdfUsingGitHubApi(){
-        const info = deriveGitHubRepo();
-        if (!info) return '';
-
-        const cleanFolder = info.folder.replace(/\/index\.html$/i, '');
-        const apiUrl =
-          `https://api.github.com/repos/${encodeURIComponent(info.owner)}/` +
-          `${encodeURIComponent(info.repo)}/contents/${cleanFolder}`;
+        atualizarMensagem("Verificando o PDF padrão da pasta /pdf...");
 
         try{
-          const response = await fetch(apiUrl, {
-            headers: { 'Accept': 'application/vnd.github+json' }
+          const testePadrao = await fetch(caminhoPdfLocal(PDF_PADRAO), {
+            method: "HEAD",
+            cache: "no-store"
           });
 
-          if (!response.ok) return '';
+          if (testePadrao.ok){
+            return {
+              nome: PDF_PADRAO,
+              url: caminhoPdfLocal(PDF_PADRAO)
+            };
+          }
+        }catch{}
 
-          const items = await response.json();
-          if (!Array.isArray(items)) return '';
+        atualizarMensagem("Consultando os arquivos publicados no GitHub...");
 
-          const pdfs = items
-            .filter(item => item.type === 'file' && /\.pdf$/i.test(item.name))
-            .sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+        const api =
+          `https://api.github.com/repos/${GITHUB_USUARIO}/` +
+          `${GITHUB_REPOSITORIO}/contents/${GITHUB_PASTA_PDF}` +
+          `?ref=${GITHUB_BRANCH}`;
 
-          if (!pdfs.length) return '';
+        const resposta = await fetch(api, {
+          headers: {
+            "Accept": "application/vnd.github+json"
+          },
+          cache: "no-store"
+        });
 
-          return pdfs[0].download_url || pdfs[0].path;
-        }catch{
-          return '';
-        }
-      }
-
-      async function urlExists(url){
-        try{
-          const response = await fetch(url, { method:'HEAD', cache:'no-store' });
-          return response.ok;
-        }catch{
-          return false;
-        }
-      }
-
-      async function findPdf(){
-        const queryPdf = getQueryPdf();
-        if (queryPdf) return queryPdf;
-
-        if (CONFIG.pdf) return CONFIG.pdf;
-
-        if (CONFIG.autoDetectGitHubPdf){
-          setLoading('Procurando o PDF publicado na pasta do GitHub...');
-          const detected = await detectPdfUsingGitHubApi();
-          if (detected) return detected;
+        if (!resposta.ok){
+          throw new Error("A pasta /pdf não pôde ser consultada no GitHub.");
         }
 
-        const fallbacks = [
-          'documento.pdf',
-          'politica.pdf',
-          'arquivo.pdf',
-          'livreto.pdf'
-        ];
+        const itens = await resposta.json();
 
-        for (const name of fallbacks){
-          setLoading(`Procurando ${name}...`);
-          if (await urlExists(name)) return name;
-        }
+        const pdfs = itens
+          .filter(item =>
+            item.type === "file" &&
+            /\.pdf$/i.test(item.name)
+          )
+          .sort((a,b) =>
+            a.name.localeCompare(b.name, "pt-BR")
+          );
 
-        return '';
-      }
-
-      function calculateBookSize(){
-        const sw = stageEl.clientWidth;
-        const sh = stageEl.clientHeight;
-        const mobile = sw < 760;
-
-        let pageHeight = Math.max(300, sh - 12);
-        let pageWidth = pageHeight / pageRatio;
-
-        const spreadWidth = mobile ? pageWidth : pageWidth * 2;
-
-        if (spreadWidth > sw - 12){
-          pageWidth = (sw - 12) / (mobile ? 1 : 2);
-          pageHeight = pageWidth * pageRatio;
+        if (!pdfs.length){
+          throw new Error("Nenhum arquivo PDF foi encontrado na pasta /pdf.");
         }
 
         return {
-          width: Math.max(220, Math.floor(pageWidth)),
-          height: Math.max(300, Math.floor(pageHeight)),
-          mobile
+          nome: pdfs[0].name,
+          url: pdfs[0].download_url
         };
       }
 
-      function getSafeRenderScale(viewport){
-        const requested = Number(CONFIG.renderScale) || 1.75;
-        const pixels = viewport.width * viewport.height * requested * requested;
-        if (pixels <= CONFIG.maxCanvasPixels) return requested;
-        return Math.sqrt(CONFIG.maxCanvasPixels / (viewport.width * viewport.height));
+      function calcularTamanhoLivro(){
+        const larguraPalco = palco.clientWidth;
+        const alturaPalco = palco.clientHeight;
+        const modoMobile = larguraPalco < 760;
+
+        let alturaPagina = Math.max(300, alturaPalco - 12);
+        let larguraPagina = alturaPagina / proporcaoPagina;
+
+        const larguraTotal = modoMobile
+          ? larguraPagina
+          : larguraPagina * 2;
+
+        if (larguraTotal > larguraPalco - 12){
+          larguraPagina =
+            (larguraPalco - 12) / (modoMobile ? 1 : 2);
+
+          alturaPagina =
+            larguraPagina * proporcaoPagina;
+        }
+
+        return {
+          largura: Math.max(220, Math.floor(larguraPagina)),
+          altura: Math.max(300, Math.floor(alturaPagina))
+        };
       }
 
-      async function renderPages(pdf){
-        const first = await pdf.getPage(1);
-        const firstViewport = first.getViewport({ scale:1 });
-        pageRatio = firstViewport.height / firstViewport.width;
+      function escalaSegura(viewport){
+        const escalaDesejada = CONFIG.escalaRenderizacao;
+        const pixels =
+          viewport.width *
+          viewport.height *
+          escalaDesejada *
+          escalaDesejada;
 
-        const fragment = document.createDocumentFragment();
+        if (pixels <= CONFIG.maximoPixelsCanvas){
+          return escalaDesejada;
+        }
 
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++){
-          setLoading(`Preparando página ${pageNumber} de ${pdf.numPages}...`);
+        return Math.sqrt(
+          CONFIG.maximoPixelsCanvas /
+          (viewport.width * viewport.height)
+        );
+      }
 
-          const page = pageNumber === 1 ? first : await pdf.getPage(pageNumber);
-          const baseViewport = page.getViewport({ scale:1 });
-          const scale = getSafeRenderScale(baseViewport);
-          const viewport = page.getViewport({ scale });
+      async function renderizarPaginas(pdf){
+        const primeiraPagina = await pdf.getPage(1);
+        const primeiraViewport =
+          primeiraPagina.getViewport({ scale: 1 });
 
-          const pageDiv = document.createElement('div');
-          pageDiv.className = 'page' + (pageNumber === 1 ? ' cover-page' : '');
-          pageDiv.dataset.density = pageNumber === 1 || pageNumber === pdf.numPages ? 'hard' : 'soft';
+        proporcaoPagina =
+          primeiraViewport.height /
+          primeiraViewport.width;
 
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d', { alpha:false });
+        const fragmento =
+          document.createDocumentFragment();
 
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          canvas.setAttribute('aria-label', `Página ${pageNumber}`);
+        for(
+          let numero = 1;
+          numero <= pdf.numPages;
+          numero++
+        ){
+          atualizarMensagem(
+            `Preparando página ${numero} de ${pdf.numPages}...`
+          );
 
-          context.fillStyle = '#ffffff';
-          context.fillRect(0,0,canvas.width,canvas.height);
+          const paginaPdf =
+            numero === 1
+              ? primeiraPagina
+              : await pdf.getPage(numero);
 
-          await page.render({
-            canvasContext: context,
+          const viewportBase =
+            paginaPdf.getViewport({ scale: 1 });
+
+          const escala =
+            escalaSegura(viewportBase);
+
+          const viewport =
+            paginaPdf.getViewport({ scale: escala });
+
+          const paginaHtml =
+            document.createElement("div");
+
+          paginaHtml.className = "pagina";
+
+          if(
+            numero === 1 ||
+            numero === pdf.numPages
+          ){
+            paginaHtml.dataset.density = "hard";
+          }else{
+            paginaHtml.dataset.density = "soft";
+          }
+
+          const canvas =
+            document.createElement("canvas");
+
+          const contexto =
+            canvas.getContext("2d", {
+              alpha: false
+            });
+
+          canvas.width =
+            Math.floor(viewport.width);
+
+          canvas.height =
+            Math.floor(viewport.height);
+
+          contexto.fillStyle = "#ffffff";
+          contexto.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          await paginaPdf.render({
+            canvasContext: contexto,
             viewport,
-            background:'#ffffff'
+            background: "#ffffff"
           }).promise;
 
-          pageDiv.appendChild(canvas);
-          fragment.appendChild(pageDiv);
+          paginaHtml.appendChild(canvas);
+          fragmento.appendChild(paginaHtml);
 
-          if (pageNumber % 3 === 0){
-            await new Promise(resolve => requestAnimationFrame(resolve));
+          if(numero % 3 === 0){
+            await new Promise(resolve =>
+              requestAnimationFrame(resolve)
+            );
           }
         }
 
-        bookEl.replaceChildren(fragment);
+        livro.replaceChildren(fragmento);
       }
 
-      function updateCounter(index){
-        const pageNumber = Math.min(totalPages, index + 1);
-        pageCounter.textContent = `${pageNumber} / ${totalPages}`;
-        firstBtn.disabled = index <= 0;
-        prevBtn.disabled = index <= 0;
-        nextBtn.disabled = index >= totalPages - 1;
-        lastBtn.disabled = index >= totalPages - 1;
+      function atualizarContador(indice){
+        const paginaAtual =
+          Math.min(totalPaginas, indice + 1);
+
+        contador.textContent =
+          `${paginaAtual} / ${totalPaginas}`;
+
+        primeira.disabled = indice <= 0;
+        anterior.disabled = indice <= 0;
+        proxima.disabled =
+          indice >= totalPaginas - 1;
+        ultima.disabled =
+          indice >= totalPaginas - 1;
       }
 
-      function initFlipbook(){
-        const size = calculateBookSize();
+      function iniciarLivreto(){
+        const tamanho =
+          calcularTamanhoLivro();
 
-        pageFlip = new St.PageFlip(bookEl, {
-          width: size.width,
-          height: size.height,
-          size: 'stretch',
+        pageFlip = new St.PageFlip(livro, {
+          width: tamanho.largura,
+          height: tamanho.altura,
+          size: "stretch",
           minWidth: 220,
-          maxWidth: size.width,
+          maxWidth: tamanho.largura,
           minHeight: 300,
-          maxHeight: size.height,
+          maxHeight: tamanho.altura,
           showCover: true,
           usePortrait: true,
           mobileScrollSupport: false,
           maxShadowOpacity: 0.35,
-          flippingTime: 720,
+          flippingTime: CONFIG.tempoVirada,
           drawShadow: true,
           autoSize: true,
           clickEventForward: true,
@@ -547,26 +615,44 @@
           disableFlipByClick: false
         });
 
-        pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-        totalPages = pageFlip.getPageCount();
+        pageFlip.loadFromHTML(
+          document.querySelectorAll(".pagina")
+        );
 
-        pageFlip.on('flip', event => updateCounter(event.data));
-        pageFlip.on('changeOrientation', () => {
-          updateCounter(pageFlip.getCurrentPageIndex());
+        totalPaginas =
+          pageFlip.getPageCount();
+
+        pageFlip.on("flip", evento => {
+          atualizarContador(evento.data);
         });
 
-        updateCounter(0);
+        atualizarContador(0);
       }
 
-      function bindControls(){
-        firstBtn.addEventListener('click', () => pageFlip && pageFlip.turnToPage(0));
-        prevBtn.addEventListener('click', () => pageFlip && pageFlip.flipPrev());
-        nextBtn.addEventListener('click', () => pageFlip && pageFlip.flipNext());
-        lastBtn.addEventListener('click', () => pageFlip && pageFlip.turnToPage(totalPages - 1));
+      function configurarControles(){
+        primeira.addEventListener("click", () => {
+          if(pageFlip) pageFlip.turnToPage(0);
+        });
 
-        fullscreenBtn.addEventListener('click', async () => {
+        anterior.addEventListener("click", () => {
+          if(pageFlip) pageFlip.flipPrev();
+        });
+
+        proxima.addEventListener("click", () => {
+          if(pageFlip) pageFlip.flipNext();
+        });
+
+        ultima.addEventListener("click", () => {
+          if(pageFlip){
+            pageFlip.turnToPage(
+              totalPaginas - 1
+            );
+          }
+        });
+
+        telaCheia.addEventListener("click", async () => {
           try{
-            if (!document.fullscreenElement){
+            if(!document.fullscreenElement){
               await document.documentElement.requestFullscreen();
             }else{
               await document.exitFullscreen();
@@ -574,65 +660,89 @@
           }catch{}
         });
 
-        document.addEventListener('keydown', event => {
-          if (!pageFlip) return;
-          if (event.key === 'ArrowLeft') pageFlip.flipPrev();
-          if (event.key === 'ArrowRight') pageFlip.flipNext();
-          if (event.key === 'Home') pageFlip.turnToPage(0);
-          if (event.key === 'End') pageFlip.turnToPage(totalPages - 1);
+        document.addEventListener("keydown", evento => {
+          if(!pageFlip) return;
+
+          if(evento.key === "ArrowLeft"){
+            pageFlip.flipPrev();
+          }
+
+          if(evento.key === "ArrowRight"){
+            pageFlip.flipNext();
+          }
+
+          if(evento.key === "Home"){
+            pageFlip.turnToPage(0);
+          }
+
+          if(evento.key === "End"){
+            pageFlip.turnToPage(
+              totalPaginas - 1
+            );
+          }
         });
 
-        window.addEventListener('resize', () => {
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(() => {
-            if (pageFlip) pageFlip.update();
+        let timerResize = null;
+
+        window.addEventListener("resize", () => {
+          clearTimeout(timerResize);
+
+          timerResize = setTimeout(() => {
+            if(pageFlip){
+              pageFlip.update();
+            }
           }, 180);
         });
       }
 
-      async function start(){
+      async function iniciar(){
         try{
-          bindControls();
+          configurarControles();
 
-          const pdfUrl = await findPdf();
-          if (!pdfUrl){
-            showError(
-              'Nenhum arquivo PDF foi encontrado automaticamente nesta pasta.'
-            );
-            return;
-          }
+          const pdfEncontrado =
+            await localizarPdf();
 
-          currentPdfUrl = pdfUrl;
-          const fileName = decodeURIComponent(pdfUrl.split('/').pop().split('?')[0]);
-          fileStatus.textContent = fileName;
+          arquivoAtual.textContent =
+            pdfEncontrado.nome;
 
-          setLoading('Abrindo o PDF...');
-          const loadingTask = pdfjsLib.getDocument({
-            url: pdfUrl,
-            cMapPacked: true,
-            disableAutoFetch: false,
-            disableStream: false
-          });
+          atualizarMensagem(
+            "Abrindo o arquivo PDF..."
+          );
 
-          const pdf = await loadingTask.promise;
-          totalPages = pdf.numPages;
+          const tarefa =
+            pdfjsLib.getDocument({
+              url: pdfEncontrado.url,
+              cMapPacked: true,
+              disableAutoFetch: false,
+              disableStream: false
+            });
 
-          setLoading(`Convertendo ${pdf.numPages} páginas para o livreto...`);
-          await renderPages(pdf);
+          const pdf =
+            await tarefa.promise;
 
-          setLoading('Montando a animação das páginas...');
-          initFlipbook();
+          totalPaginas =
+            pdf.numPages;
 
-          loader.classList.add('hidden');
+          await renderizarPaginas(pdf);
+
+          atualizarMensagem(
+            "Montando o efeito de livreto..."
+          );
+
+          iniciarLivreto();
+
+          carregamento.classList.add("oculto");
         }catch(error){
           console.error(error);
-          showError(
-            'O arquivo foi localizado, mas não pôde ser processado. Verifique se o PDF está íntegro e se o site foi aberto pelo GitHub Pages.'
+
+          mostrarErro(
+            error?.message ||
+            "O PDF foi localizado, mas não pôde ser processado."
           );
         }
       }
 
-      start();
+      iniciar();
     })();
   </script>
 </body>
