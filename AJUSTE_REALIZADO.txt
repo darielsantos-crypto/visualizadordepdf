@@ -1,0 +1,15 @@
+AJUSTE REALIZADO — VISUALIZADOR DE PDF
+
+- Repositório padrão definido diretamente no código: darielsantos-crypto/visualizadordepdf
+- Branch padrão: main
+- Pasta dos documentos: pdf
+- O sistema não depende mais do arquivo .env para localizar os PDFs.
+- Caminho da GitHub API corrigido e codificado com segurança.
+- Cache da lista separado por repositório, branch e pasta.
+- Mensagens de erro melhoradas.
+- TypeScript e build de produção validados com sucesso.
+
+Arquivos principais alterados:
+- src/utils/constants.ts
+- src/services/githubApi.ts
+- .env.example
