@@ -8,7 +8,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 export async function loadPdf(url: string): Promise<PDFDocumentProxy> {
   const loadingTask = pdfjsLib.getDocument({
     url,
-    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.1.200/cmaps/',
+    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/',
     cMapPacked: true,
     disableFontFace: false,
   });
