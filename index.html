@@ -1,154 +1,19 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#004883">
-<title>Biblioteca Corporativa | Lucena Infraestrutura</title>
-<style>
-:root{
-  --blue:#004883;--blue-dark:#00345f;--blue-soft:#0a5a91;--red:#ef3340;
-  --stage:#555;--side:310px;--toolbar:58px;--topbar:58px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:var(--blue);color:#fff}
-button,input{font:inherit}button{border:0}.hidden{display:none!important}
-.app{width:100%;height:100%;display:grid;grid-template-columns:var(--side) minmax(0,1fr);transition:grid-template-columns .22s ease;background:var(--stage)}
-.app.menu-collapsed{grid-template-columns:0 minmax(0,1fr)}
-.sidebar{min-width:0;overflow:hidden;background:linear-gradient(180deg,#002d52,#004883);border-right:1px solid #ffffff20;z-index:40}
-.sidebar-content{width:var(--side);height:100%;display:grid;grid-template-rows:64px 62px minmax(0,1fr)}
-.brand{display:flex;align-items:center;gap:11px;padding:11px 15px;border-bottom:1px solid #ffffff20}
-.brand-line{width:8px;height:39px;border-radius:8px;background:var(--red);flex:0 0 auto}.brand strong{display:block;font-size:17px;line-height:1.05}.brand small{display:block;margin-top:4px;font-size:11px;opacity:.72}
-.filter{padding:11px}.input{height:40px;display:flex;align-items:center;gap:8px;padding:0 11px;border:1px solid #ffffff2d;border-radius:10px;background:#ffffff10}.input input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:inherit;user-select:text}.input input::placeholder{color:#ffffffa0}
-.doc-list{overflow:auto;padding:0 9px 15px;scrollbar-width:thin;scrollbar-color:#ffffff40 transparent}
-.doc-item{width:100%;display:grid;grid-template-columns:35px minmax(0,1fr) 18px;align-items:center;gap:9px;padding:10px;border:1px solid transparent;border-radius:11px;background:transparent;color:#fff;text-align:left;cursor:pointer;margin-bottom:5px}.doc-item:hover{background:#ffffff11}.doc-item.active{background:#fff;color:var(--blue-dark);box-shadow:0 8px 22px #0003}.doc-icon{height:40px;border-radius:6px;display:grid;place-items:center;background:#ffffff18;font-size:9px;font-weight:800}.doc-item.active .doc-icon{background:var(--red);color:#fff}.doc-name{font-size:13px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.doc-arrow{opacity:.45;font-size:18px}
-.viewer{position:relative;min-width:0;min-height:0;display:grid;grid-template-rows:var(--topbar) minmax(0,1fr) var(--toolbar);background:var(--stage)}
-.menu-toggle{position:absolute;left:-18px;top:50%;z-index:55;width:36px;height:64px;border-radius:0 12px 12px 0;background:var(--blue);color:#fff;box-shadow:4px 0 14px #0004;cursor:pointer;font-size:22px;transition:left .22s ease}.app.menu-collapsed .menu-toggle{left:0}.menu-toggle:hover{background:var(--blue-soft)}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px 7px 27px;background:var(--blue);border-bottom:1px solid #ffffff20;z-index:30}.top-left,.top-right{display:flex;align-items:center;gap:7px;min-width:0}.title{min-width:0}.title strong{display:block;max-width:min(47vw,760px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.title small{display:block;margin-top:3px;font-size:10px;opacity:.65}
-.tool{height:40px;min-width:40px;padding:0 11px;border:1px solid #ffffff2b;border-radius:10px;background:#ffffff10;color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}.tool:hover{background:#ffffff1d}.tool:disabled{opacity:.32;cursor:not-allowed}.mode{display:flex;height:40px;padding:3px;border:1px solid #ffffff2b;border-radius:10px;background:#0002}.mode button{height:32px;padding:0 11px;border-radius:7px;background:transparent;color:#ffffffb8;cursor:pointer;font-size:12px;font-weight:700}.mode button.active{background:#fff;color:var(--blue-dark)}
-.stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(circle at center,#ffffff10,transparent 48%),var(--stage);padding:14px}
-.stage.document-mode{overflow:auto;padding:18px;scrollbar-color:#ffffff55 #444}
-.stage-center{position:relative;width:100%;height:100%;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center}
-.book-frame{position:relative;flex:0 0 auto;overflow:visible}
-.book-scale{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;contain:layout style}
-.flip-book-root{position:relative;filter:none}
-.flip-page{position:relative;background:#fff;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.035)}
-.page-host{position:absolute;inset:0;background:#fff;overflow:hidden}
-.page-placeholder{position:absolute;inset:0;display:grid;place-items:center;background:#fff;color:#9aa6af;font-size:11px}
-.page-surface{position:absolute;inset:0;background:#fff;overflow:hidden}
-.page-surface img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}
-.textLayer{position:absolute;inset:0;overflow:hidden;opacity:1;line-height:1;transform-origin:0 0;z-index:3;user-select:text;-webkit-user-select:text;cursor:text}
-.textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;transform-origin:0 0;user-select:text;-webkit-user-select:text;cursor:text}
-.textLayer ::selection{background:rgba(0,110,255,.38)}.textLayer ::-moz-selection{background:rgba(0,110,255,.38)}
-.document-stack{width:100%;display:none;flex-direction:column;align-items:center;gap:20px;padding:4px 0 30px}
-.stage.document-mode .book-frame{display:none}.stage.document-mode .document-stack{display:flex}
-.document-placeholder{position:relative;flex:0 0 auto;background:#fff;box-shadow:0 14px 38px #0007;overflow:hidden}
-.document-inner{position:absolute;left:0;top:0;transform-origin:0 0;background:#fff}
-.page-loading{position:absolute;inset:0;display:grid;place-items:center;color:#6b7780;font-size:12px;background:#fff}
-.toolbar{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:var(--blue);border-top:1px solid #ffffff20;z-index:30}.counter{min-width:104px;text-align:center;font-size:12px;font-weight:800}.zoom-label{min-width:48px;text-align:center;font-size:11px;opacity:.72}
-.loader{position:absolute;inset:0;z-index:70;display:grid;place-items:center;background:var(--stage);transition:.2s}.loader.hide{opacity:0;visibility:hidden;pointer-events:none}.load{text-align:center;padding:20px}.spinner{width:46px;height:46px;margin:0 auto 15px;border:4px solid #ffffff3b;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.load b{display:block;font-size:17px}.load span{display:block;margin-top:7px;font-size:12px;opacity:.75}
-.error{display:none;position:absolute;z-index:80;width:min(580px,90vw);padding:24px;border-radius:16px;background:#00345ff8;box-shadow:0 24px 60px #0008;text-align:center}.error.show{display:block}.error h2{margin:0 0 10px;font-size:20px}.error p{margin:0;font-size:13px;line-height:1.45}
-.search-panel{display:none;position:absolute;top:66px;right:12px;z-index:90;width:min(400px,calc(100vw - 24px));max-height:72vh;background:#f7fafc;color:#173044;border-radius:14px;box-shadow:0 24px 65px #0009;overflow:hidden}.search-panel.open{display:grid;grid-template-rows:auto minmax(0,1fr)}.search-head{padding:10px;border-bottom:1px solid #d6e0e7}.search-head .input{border-color:#c9d6df;background:#fff}.search-head input{color:#173044}.search-head input::placeholder{color:#748594}.results{overflow:auto;padding:7px}.result{width:100%;padding:10px;border-radius:9px;background:transparent;color:#173044;text-align:left;cursor:pointer}.result:hover{background:#e7f1f7}.result b{display:block;color:var(--blue);margin-bottom:4px}.result span{font-size:12px;line-height:1.35;color:#586b7b}
-.overlay{display:none;position:fixed;inset:0;background:#0008;z-index:35}
-@media(max-width:920px){:root{--side:min(310px,88vw)}.app,.app.menu-collapsed{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);transform:translateX(-102%);transition:transform .22s ease;box-shadow:18px 0 40px #0005}.sidebar.open{transform:translateX(0)}.overlay.show{display:block}.menu-toggle{left:0}.title strong{max-width:38vw}.label{display:none}}
-@media(max-width:650px){.viewer{grid-template-rows:54px minmax(0,1fr) 58px}.topbar{padding:6px 6px 6px 42px}.title small{display:none}.title strong{max-width:30vw}.mode button{padding:0 8px;font-size:11px}.tool{padding:0 9px}.stage{padding:7px}.toolbar .tool.first,.toolbar .tool.last{display:none}.counter{min-width:84px}}
-</style>
-</head>
-<body>
-<div class="overlay" id="overlay"></div>
-<main class="app" id="app">
-  <aside class="sidebar" id="sidebar"><div class="sidebar-content">
-    <div class="brand"><div class="brand-line"></div><div><strong>Biblioteca Corporativa</strong><small>Lucena Infraestrutura</small></div></div>
-    <div class="filter"><div class="input">⌕<input id="docFilter" type="search" placeholder="Localizar documento..."></div></div>
-    <nav class="doc-list" id="docList"></nav>
-  </div></aside>
-
-  <section class="viewer">
-    <button class="menu-toggle" id="menuToggle" title="Abrir ou recolher menu">‹</button>
-    <header class="topbar">
-      <div class="top-left"><div class="title"><strong id="title">Biblioteca Corporativa</strong><small id="subtitle"></small></div></div>
-      <div class="top-right">
-        <div class="mode"><button id="bookMode" class="active">Livreto</button><button id="documentMode">Documento</button></div>
-        <button class="tool" id="searchButton">⌕ <span class="label">Pesquisar</span></button>
-        <button class="tool" id="downloadButton">⇩ <span class="label">Baixar</span></button>
-        <button class="tool" id="fullscreenButton">⛶</button>
-      </div>
-    </header>
-
-    <section class="stage" id="stage">
-      <div class="stage-center" id="stageCenter">
-        <div class="book-frame" id="bookFrame"><div class="book-scale" id="bookScale"><div id="flipBook" class="flip-book-root"></div></div></div>
-        <div class="document-stack" id="documentStack"></div>
-      </div>
-      <div class="loader" id="loader"><div class="load"><div class="spinner"></div><b>Carregando documento</b><span id="loaderText">Localizando os PDFs...</span></div></div>
-      <div class="error" id="error"><h2>Não foi possível abrir</h2><p id="errorText"></p></div>
-      <div class="search-panel" id="searchPanel"><div class="search-head"><div class="input">⌕<input id="textSearch" type="search" placeholder="Pesquisar palavra ou expressão..."></div></div><div class="results" id="results"></div></div>
-    </section>
-
-    <footer class="toolbar">
-      <button class="tool first" id="firstButton">⏮</button><button class="tool" id="previousButton">←</button><div class="counter" id="counter">0 / 0</div><button class="tool" id="nextButton">→</button><button class="tool last" id="lastButton">⏭</button>
-      <button class="tool" id="zoomOutButton">−</button><div class="zoom-label" id="zoomLabel">100%</div><button class="tool" id="zoomInButton">＋</button><button class="tool" id="fitButton">Ajustar</button>
-    </footer>
-  </section>
-</main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-<script>
-(()=>{"use strict";
-const OWNER="darielsantos-crypto",REPO="visualizadordepdf",BRANCH="main",FOLDER="pdf";
-const MAX_CACHED_DOCUMENTS=2,ASSET_WIDTH=1200,BOOK_PRELOAD_RADIUS=2;
-const $=id=>document.getElementById(id);
-const E={app:$("app"),sidebar:$("sidebar"),overlay:$("overlay"),menuToggle:$("menuToggle"),docFilter:$("docFilter"),docList:$("docList"),title:$("title"),subtitle:$("subtitle"),bookMode:$("bookMode"),documentMode:$("documentMode"),searchButton:$("searchButton"),downloadButton:$("downloadButton"),fullscreenButton:$("fullscreenButton"),stage:$("stage"),stageCenter:$("stageCenter"),bookFrame:$("bookFrame"),bookScale:$("bookScale"),flipBook:$("flipBook"),documentStack:$("documentStack"),loader:$("loader"),loaderText:$("loaderText"),error:$("error"),errorText:$("errorText"),searchPanel:$("searchPanel"),textSearch:$("textSearch"),results:$("results"),firstButton:$("firstButton"),previousButton:$("previousButton"),counter:$("counter"),nextButton:$("nextButton"),lastButton:$("lastButton"),zoomOutButton:$("zoomOutButton"),zoomLabel:$("zoomLabel"),zoomInButton:$("zoomInButton"),fitButton:$("fitButton")};
-pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-let docs=[],active=null,state=null,pageFlip=null,total=0,current=0,zoom=1,mode="book",menuOpen=innerWidth>920,loadToken=0;
-let basePageWidth=560,basePageHeight=792,bookPortrait=innerWidth<760,fitScale=1,docObserver=null,documentBuilt=false,docBaseWidth=800,docBaseHeight=1131,resizeFrame=0;
-const documentCache=new Map();
-
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
-const clean=n=>decodeURIComponent(n).replace(/\.pdf$/i,"").replace(/[_-]+/g," ").replace(/\s+/g," ").trim();
-const idle=fn=>(window.requestIdleCallback?requestIdleCallback(fn,{timeout:700}):setTimeout(fn,30));
-function loading(m){E.loaderText.textContent=m;E.loader.classList.remove("hide");E.error.classList.remove("show")}
-function hideLoading(){E.loader.classList.add("hide")}
-function fail(m){E.errorText.textContent=m;E.error.classList.add("show");hideLoading()}
-function localPdfUrl(name){return `${FOLDER}/${name.split("/").map(encodeURIComponent).join("/")}`}
-function touchCache(key){if(!documentCache.has(key))return;const value=documentCache.get(key);documentCache.delete(key);documentCache.set(key,value)}
-function trimCache(){while(documentCache.size>MAX_CACHED_DOCUMENTS){const [key,value]=documentCache.entries().next().value;if(value===state){touchCache(key);continue}for(const asset of value.assets){if(asset?.url)URL.revokeObjectURL(asset.url)}documentCache.delete(key)}}
-async function listDocs(){const cacheKey="lucena-pdf-list-v5";try{const cached=JSON.parse(localStorage.getItem(cacheKey)||"null");if(cached&&Date.now()-cached.time<600000&&Array.isArray(cached.items))docs=cached.items}catch{};try{const url=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${BRANCH}`,r=await fetch(url,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});if(!r.ok)throw Error();const items=await r.json();docs=items.filter(x=>x.type==="file"&&/\.pdf$/i.test(x.name)).map(x=>({name:x.name,title:clean(x.name),url:localPdfUrl(x.name)})).sort((a,b)=>a.title.localeCompare(b.title,"pt-BR"));localStorage.setItem(cacheKey,JSON.stringify({time:Date.now(),items:docs}))}catch{if(!docs.length)throw Error("Não foi possível consultar os PDFs da pasta /pdf.")};if(!docs.length)throw Error("Nenhum PDF foi encontrado na pasta /pdf.")}
-function renderMenu(q=""){q=q.trim().toLowerCase();E.docList.innerHTML="";docs.filter(d=>!q||d.title.toLowerCase().includes(q)).forEach(d=>{const b=document.createElement("button");b.className="doc-item"+(active&&active.name===d.name?" active":"");b.innerHTML=`<span class="doc-icon">PDF</span><span class="doc-name">${esc(d.title)}</span><span class="doc-arrow">›</span>`;b.onclick=()=>openDoc(d);E.docList.appendChild(b)});if(!E.docList.children.length)E.docList.innerHTML='<div style="padding:18px 10px;font-size:13px;opacity:.7">Nenhum documento encontrado.</div>'}
-function setMenu(open){menuOpen=open;if(innerWidth<=920){E.sidebar.classList.toggle("open",open);E.overlay.classList.toggle("show",open)}else E.app.classList.toggle("menu-collapsed",!open);E.menuToggle.textContent=open?"‹":"›";scheduleFit()}
-function updateCounter(){const page=total?Math.min(total,current+1):0;E.counter.textContent=`${page} / ${total}`;E.firstButton.disabled=current<=0;E.previousButton.disabled=current<=0;E.nextButton.disabled=!total||current>=total-1;E.lastButton.disabled=!total||current>=total-1}
-function calculateBaseDimensions(){const ratio=state?.ratio||1.4142;const usableHeight=Math.max(320,E.stage.clientHeight-28);const fullWidth=Math.max(320,window.innerWidth-28);bookPortrait=window.innerWidth<760;basePageWidth=Math.floor(Math.max(220,Math.min(usableHeight/ratio,fullWidth/(bookPortrait?1:2))));basePageHeight=Math.floor(basePageWidth*ratio)}
-function updateBookFit(){if(mode!=="book"||!state)return;const spreadFactor=bookPortrait?1:2;const naturalW=basePageWidth*spreadFactor,naturalH=basePageHeight;const availableW=Math.max(220,E.stage.clientWidth-28),availableH=Math.max(280,E.stage.clientHeight-28);fitScale=Math.min(1,availableW/naturalW,availableH/naturalH);const scale=fitScale*zoom,frameW=Math.ceil(naturalW*scale),frameH=Math.ceil(naturalH*scale);E.bookFrame.style.width=`${frameW}px`;E.bookFrame.style.height=`${frameH}px`;E.bookScale.style.width=`${naturalW}px`;E.bookScale.style.height=`${naturalH}px`;E.bookScale.style.transform=`scale(${scale})`;E.stageCenter.style.minWidth=`${Math.max(E.stage.clientWidth,frameW)}px`;E.stageCenter.style.minHeight=`${Math.max(E.stage.clientHeight,frameH)}px`;E.stage.style.overflow=zoom>1.02?"auto":"hidden"}
-function scheduleFit(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(updateBookFit)}
-async function getPage(index){if(!state.pages[index])state.pages[index]=state.pdf.getPage(index+1);return state.pages[index]}
-async function ensureText(index){if(state.texts[index]!=null)return state.texts[index];if(!state.textPromises[index])state.textPromises[index]=(async()=>{const page=await getPage(index),content=await page.getTextContent();state.textContents[index]=content;return content.items.map(x=>x.str).join(" ")})();state.texts[index]=await state.textPromises[index];return state.texts[index]}
-function canvasToBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Falha ao criar imagem da página")),"image/webp",.96))}
-async function ensureAsset(index){if(state.assets[index])return state.assets[index];if(!state.assetPromises[index])state.assetPromises[index]=(async()=>{const page=await getPage(index),base=page.getViewport({scale:1}),renderScale=ASSET_WIDTH/base.width,viewport=page.getViewport({scale:renderScale}),canvas=document.createElement("canvas"),ctx=canvas.getContext("2d",{alpha:false});canvas.width=Math.floor(viewport.width);canvas.height=Math.floor(viewport.height);ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);await page.render({canvasContext:ctx,viewport,background:"#fff"}).promise;const blob=await canvasToBlob(canvas),url=URL.createObjectURL(blob);const textContent=state.textContents[index]||await page.getTextContent();state.textContents[index]=textContent;state.texts[index]=textContent.items.map(x=>x.str).join(" ");return{url,width:viewport.width,height:viewport.height,baseWidth:base.width,baseHeight:base.height,textContent}})();state.assets[index]=await state.assetPromises[index];return state.assets[index]}
-async function createSurface(index,cssWidth,cssHeight){const asset=await ensureAsset(index),surface=document.createElement("div");surface.className="page-surface";surface.style.width=`${cssWidth}px`;surface.style.height=`${cssHeight}px`;const img=document.createElement("img");img.src=asset.url;img.alt=`Página ${index+1}`;const textLayer=document.createElement("div");textLayer.className="textLayer";textLayer.style.width=`${cssWidth}px`;textLayer.style.height=`${cssHeight}px`;surface.append(img,textLayer);textLayer.addEventListener("pointerdown",event=>event.stopPropagation());const page=await getPage(index),viewport=page.getViewport({scale:cssWidth/asset.baseWidth});try{const task=pdfjsLib.renderTextLayer({textContentSource:asset.textContent,container:textLayer,viewport,textDivs:[]});if(task?.promise)await task.promise;else if(task)await task}catch(e){console.warn("Text layer",e)}return surface}
-function destroyPageFlip(){try{if(pageFlip)pageFlip.destroy()}catch{}pageFlip=null;E.flipBook.innerHTML=""}
-function makeBookShell(index){const pageElement=document.createElement("div");pageElement.className="flip-page";pageElement.dataset.index=String(index);pageElement.dataset.density=(index===0||index===total-1)?"hard":"soft";pageElement.style.width=`${basePageWidth}px`;pageElement.style.height=`${basePageHeight}px`;const host=document.createElement("div");host.className="page-host";host.innerHTML='<div class="page-placeholder">Carregando...</div>';pageElement.appendChild(host);return pageElement}
-async function hydrateBookPage(index){if(index<0||index>=total)return;const host=E.flipBook.querySelector(`.flip-page[data-index="${index}"] .page-host`);if(!host||host.dataset.ready==="1"||host.dataset.loading==="1")return;host.dataset.loading="1";try{const surface=await createSurface(index,basePageWidth,basePageHeight);host.replaceChildren(surface);host.dataset.ready="1"}catch(e){host.innerHTML='<div class="page-placeholder">Não foi possível carregar esta página.</div>';console.error(e)}finally{host.dataset.loading="0"}}
-async function hydrateNeighborhood(index){const order=[index,index+1,index-1,index+2,index-2];for(const pageIndex of order){if(pageIndex>=0&&pageIndex<total)await hydrateBookPage(pageIndex)}}
-async function buildBook(){destroyPageFlip();calculateBaseDimensions();const fragment=document.createDocumentFragment();for(let i=0;i<total;i++)fragment.appendChild(makeBookShell(i));E.flipBook.appendChild(fragment);pageFlip=new St.PageFlip(E.flipBook,{width:basePageWidth,height:basePageHeight,size:"fixed",showCover:true,usePortrait:true,mobileScrollSupport:false,maxShadowOpacity:.12,flippingTime:700,drawShadow:false,autoSize:false,clickEventForward:true,useMouseEvents:true,swipeDistance:22,showPageCorners:true,disableFlipByClick:false});pageFlip.loadFromHTML(E.flipBook.querySelectorAll(".flip-page"));pageFlip.on("flip",event=>{current=event.data;updateCounter();hydrateNeighborhood(current)});pageFlip.on("changeOrientation",()=>{current=pageFlip.getCurrentPageIndex();updateCounter();hydrateNeighborhood(current)});pageFlip.turnToPage(Math.min(current,total-1));updateBookFit();await Promise.all([hydrateBookPage(current),hydrateBookPage(current+1)]);hydrateNeighborhood(current);updateCounter()}
-function documentBaseWidth(){return Math.max(280,Math.min(900,E.stage.clientWidth-48))}
-function clearDocumentObserver(){if(docObserver){docObserver.disconnect();docObserver=null}}
-async function hydrateDocumentPage(placeholder,index){if(placeholder.dataset.ready==="1"||placeholder.dataset.loading==="1")return;placeholder.dataset.loading="1";try{const baseW=Number(placeholder.dataset.baseWidth),baseH=Number(placeholder.dataset.baseHeight),inner=placeholder.querySelector(".document-inner"),surface=await createSurface(index,baseW,baseH);inner.replaceChildren(surface);placeholder.dataset.ready="1"}catch(e){console.error(e)}finally{placeholder.dataset.loading="0"}}
-function applyDocumentZoom(){E.stageCenter.style.minWidth="100%";E.stageCenter.style.minHeight="100%";E.documentStack.querySelectorAll(".document-placeholder").forEach(ph=>{const inner=ph.querySelector(".document-inner");ph.style.width=`${Math.round(docBaseWidth*zoom)}px`;ph.style.height=`${Math.round(docBaseHeight*zoom)}px`;inner.style.width=`${docBaseWidth}px`;inner.style.height=`${docBaseHeight}px`;inner.style.transform=`scale(${zoom})`});E.stage.style.overflow="auto"}
-function buildDocument(){clearDocumentObserver();E.documentStack.innerHTML="";docBaseWidth=documentBaseWidth();docBaseHeight=docBaseWidth*(state?.ratio||1.4142);const fragment=document.createDocumentFragment();for(let i=0;i<total;i++){const ph=document.createElement("div");ph.className="document-placeholder";ph.dataset.index=String(i);ph.dataset.baseWidth=String(docBaseWidth);ph.dataset.baseHeight=String(docBaseHeight);ph.style.width=`${Math.round(docBaseWidth*zoom)}px`;ph.style.height=`${Math.round(docBaseHeight*zoom)}px`;const inner=document.createElement("div");inner.className="document-inner";inner.style.width=`${docBaseWidth}px`;inner.style.height=`${docBaseHeight}px`;inner.style.transform=`scale(${zoom})`;inner.innerHTML='<div class="page-loading">Carregando página...</div>';ph.appendChild(inner);fragment.appendChild(ph)}E.documentStack.appendChild(fragment);docObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting)hydrateDocumentPage(entry.target,Number(entry.target.dataset.index))}),{root:E.stage,rootMargin:"650px 0px",threshold:.01});E.documentStack.querySelectorAll(".document-placeholder").forEach(ph=>docObserver.observe(ph));documentBuilt=true;applyDocumentZoom();requestAnimationFrame(()=>goToPage(current,false))}
-function syncDocPage(){if(mode!=="document")return;const top=E.stage.getBoundingClientRect().top+24;let best=0,dist=Infinity;E.documentStack.querySelectorAll(".document-placeholder").forEach((el,i)=>{const d=Math.abs(el.getBoundingClientRect().top-top);if(d<dist){dist=d;best=i}});if(best!==current){current=best;updateCounter()}}
-function goToPage(index,smooth=true){index=Math.max(0,Math.min(total-1,index));current=index;if(mode==="book"){pageFlip?.turnToPage(index);hydrateNeighborhood(index)}else{const el=E.documentStack.querySelector(`[data-index="${index}"]`);el?.scrollIntoView({behavior:smooth?"smooth":"auto",block:"start"})}updateCounter()}
-function setZoom(value){zoom=Math.max(.7,Math.min(1.8,value));E.zoomLabel.textContent=Math.round(zoom*100)+"%";if(mode==="book")updateBookFit();else applyDocumentZoom()}
-function setMode(next){if(mode===next)return;mode=next;E.bookMode.classList.toggle("active",mode==="book");E.documentMode.classList.toggle("active",mode==="document");E.stage.classList.toggle("document-mode",mode==="document");E.stage.scrollTo({top:0,left:0});if(mode==="book"){E.stage.style.overflow="hidden";scheduleFit();hydrateNeighborhood(current)}else{if(!documentBuilt)buildDocument();else applyDocumentZoom();requestAnimationFrame(()=>goToPage(current,false))}}
-async function search(query){query=query.trim().toLowerCase();E.results.innerHTML="";if(query.length<2){E.results.innerHTML='<div style="padding:14px;font-size:13px;color:#657786">Digite pelo menos duas letras.</div>';return}let hits=0;for(let i=0;i<total;i++){let text="";try{text=await ensureText(i)}catch{}const pos=text.toLowerCase().indexOf(query);if(pos<0)continue;hits++;const excerpt=text.slice(Math.max(0,pos-55),Math.min(text.length,pos+query.length+95)).replace(/\s+/g," ");const button=document.createElement("button");button.className="result";button.innerHTML=`<b>Página ${i+1}</b><span>...${esc(excerpt)}...</span>`;button.onclick=()=>{goToPage(i);E.searchPanel.classList.remove("open")};E.results.appendChild(button)}if(!hits)E.results.innerHTML='<div style="padding:14px;font-size:13px;color:#657786">Nenhuma ocorrência encontrada.</div>'}
-async function loadState(documentInfo){if(documentCache.has(documentInfo.url)){const cached=documentCache.get(documentInfo.url);touchCache(documentInfo.url);return cached}const task=pdfjsLib.getDocument({url:documentInfo.url,cMapPacked:true,disableAutoFetch:false,disableStream:false}),pdfDoc=await task.promise,first=await pdfDoc.getPage(1),viewport=first.getViewport({scale:1}),newState={key:documentInfo.url,pdf:pdfDoc,total:pdfDoc.numPages,ratio:viewport.height/viewport.width,pages:[],assets:[],assetPromises:[],texts:[],textPromises:[],textContents:[]};newState.pages[0]=Promise.resolve(first);documentCache.set(documentInfo.url,newState);trimCache();return newState}
-async function openDoc(documentInfo){const token=++loadToken;active=documentInfo;current=0;zoom=1;E.zoomLabel.textContent="100%";renderMenu(E.docFilter.value);const url=new URL(location.href);url.searchParams.set("documento",documentInfo.name);history.replaceState(null,"",url);E.title.textContent=documentInfo.title;E.subtitle.textContent="";E.searchPanel.classList.remove("open");clearDocumentObserver();destroyPageFlip();E.documentStack.innerHTML="";documentBuilt=false;E.flipBook.innerHTML="";total=0;updateCounter();loading("Abrindo documento...");try{state=await loadState(documentInfo);if(token!==loadToken)return;total=state.total;await buildBook();if(token!==loadToken)return;hideLoading();if(mode==="document"){E.stage.classList.add("document-mode");buildDocument()}else{E.stage.classList.remove("document-mode");scheduleFit()}}catch(error){console.error(error);fail("O PDF foi localizado, mas não pôde ser aberto. Atualize a página e tente novamente.")}}
-E.menuToggle.onclick=()=>setMenu(!menuOpen);E.overlay.onclick=()=>setMenu(false);E.docFilter.oninput=event=>renderMenu(event.target.value);E.bookMode.onclick=()=>setMode("book");E.documentMode.onclick=()=>setMode("document");E.searchButton.onclick=()=>{E.searchPanel.classList.toggle("open");if(E.searchPanel.classList.contains("open"))setTimeout(()=>E.textSearch.focus(),30)};E.textSearch.oninput=event=>{clearTimeout(E.textSearch._timer);E.textSearch._timer=setTimeout(()=>search(event.target.value),220)};E.downloadButton.onclick=()=>{if(!active)return;const link=document.createElement("a");link.href=active.url;link.download=active.name;link.click()};E.fullscreenButton.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}};
-E.firstButton.onclick=async()=>{if(mode==="book"&&pageFlip){await hydrateNeighborhood(0);pageFlip.turnToPage(0)}else goToPage(0)};E.previousButton.onclick=()=>mode==="book"&&pageFlip?pageFlip.flipPrev():goToPage(current-1);E.nextButton.onclick=()=>mode==="book"&&pageFlip?pageFlip.flipNext():goToPage(current+1);E.lastButton.onclick=async()=>{if(mode==="book"&&pageFlip){await hydrateNeighborhood(total-1);pageFlip.turnToPage(total-1)}else goToPage(total-1)};E.zoomOutButton.onclick=()=>setZoom(zoom-.1);E.zoomInButton.onclick=()=>setZoom(zoom+.1);E.fitButton.onclick=()=>setZoom(1);
-E.stage.addEventListener("scroll",()=>{clearTimeout(E.stage._scrollTimer);E.stage._scrollTimer=setTimeout(syncDocPage,80)});document.addEventListener("keydown",event=>{if(event.key==="Escape")E.searchPanel.classList.remove("open");if(document.activeElement?.tagName==="INPUT")return;if(event.key==="ArrowLeft")E.previousButton.click();if(event.key==="ArrowRight")E.nextButton.click();if(event.key==="Home")E.firstButton.click();if(event.key==="End")E.lastButton.click();if(event.key==="+"||event.key==="=")setZoom(zoom+.1);if(event.key==="-")setZoom(zoom-.1)});
-const stageObserver=new ResizeObserver(()=>scheduleFit());stageObserver.observe(E.stage);window.addEventListener("resize",()=>{const nextPortrait=innerWidth<760;if(nextPortrait!==bookPortrait&&state&&mode==="book"){bookPortrait=nextPortrait;clearTimeout(window.__bookResize);window.__bookResize=setTimeout(async()=>{const keep=current;await buildBook();goToPage(keep,false)},220)}else scheduleFit()});
-(async()=>{try{setMenu(menuOpen);loading("Localizando documentos...");await listDocs();renderMenu();const requested=new URLSearchParams(location.search).get("documento"),documentInfo=docs.find(item=>item.name===requested)||docs[0];await openDoc(documentInfo)}catch(error){console.error(error);fail(error.message||"Não foi possível carregar a biblioteca.")}})();
-})();
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#004883" />
+    <title>Biblioteca Corporativa | Leitor de PDF</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
