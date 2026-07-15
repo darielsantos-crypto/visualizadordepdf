@@ -1,38 +1,802 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#004883" />
-    <title>Biblioteca Corporativa | Leitor de PDF</title>
-    <script>
-      // Compatibilidade para PDF.js 6 em navegadores que ainda não implementam
-      // Uint8Array.prototype.toHex (Chrome/Edge corporativos e WebViews antigos).
-      (() => {
-        if (typeof Uint8Array.prototype.toHex !== 'function') {
-          Object.defineProperty(Uint8Array.prototype, 'toHex', {
-            configurable: true,
-            writable: true,
-            value: function toHex() {
-              let hex = '';
-              for (let i = 0; i < this.length; i += 1) {
-                hex += this[i].toString(16).padStart(2, '0');
-              }
-              return hex;
-            },
-          });
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#004883" />
+  <title>Biblioteca Corporativa | Lucena Infraestrutura</title>
+
+  <style>
+    :root{
+      --azul:#004883;
+      --azul-escuro:#00345f;
+      --branco:#ffffff;
+      --vermelho:#ef3340;
+      --sombra:0 28px 70px rgba(0,0,0,.34);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      width:100%;
+      height:100%;
+      margin:0;
+      overflow:hidden;
+      background:var(--azul);
+      font-family:Arial,Helvetica,sans-serif;
+    }
+
+    body{
+      color:#fff;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    .app{
+      width:100%;
+      height:100%;
+      min-height:100dvh;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      background:var(--azul);
+    }
+
+    .topo{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:10px clamp(12px,3vw,28px);
+      background:var(--azul);
+    }
+
+    .marca{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .marca-barra{
+      width:8px;
+      height:30px;
+      border-radius:10px;
+      background:var(--vermelho);
+      flex:0 0 auto;
+    }
+
+    .marca-texto{
+      min-width:0;
+      line-height:1.05;
+    }
+
+    .marca-texto strong{
+      display:block;
+      font-size:clamp(14px,2vw,18px);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .marca-texto span{
+      display:block;
+      margin-top:4px;
+      font-size:11px;
+      opacity:.75;
+    }
+
+    .arquivo-atual{
+      max-width:42vw;
+      font-size:12px;
+      opacity:.82;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-align:right;
+    }
+
+    .palco{
+      position:relative;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      padding:8px clamp(6px,2vw,22px);
+      background:var(--azul);
+    }
+
+    #livro{
+      filter:drop-shadow(0 24px 28px rgba(0,0,0,.34));
+    }
+
+    .pagina{
+      background:#fff;
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
+    }
+
+    .pagina canvas{
+      width:100%;
+      height:100%;
+      display:block;
+      background:#fff;
+    }
+
+    .carregamento{
+      position:absolute;
+      inset:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--azul);
+      transition:opacity .25s ease, visibility .25s ease;
+    }
+
+    .carregamento.oculto{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .carregamento-conteudo{
+      width:min(440px,88vw);
+      text-align:center;
+    }
+
+    .spinner{
+      width:48px;
+      height:48px;
+      margin:0 auto 18px;
+      border:4px solid rgba(255,255,255,.25);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation:girar .8s linear infinite;
+    }
+
+    @keyframes girar{
+      to{transform:rotate(360deg)}
+    }
+
+    .carregamento-titulo{
+      font-size:19px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .carregamento-mensagem{
+      font-size:13px;
+      line-height:1.45;
+      opacity:.82;
+    }
+
+    .erro{
+      display:none;
+      position:absolute;
+      z-index:30;
+      width:min(660px,92vw);
+      padding:26px;
+      border-radius:18px;
+      background:rgba(0,39,73,.98);
+      box-shadow:var(--sombra);
+      text-align:center;
+    }
+
+    .erro.visivel{display:block}
+
+    .erro h2{
+      margin:0 0 12px;
+      font-size:22px;
+    }
+
+    .erro p{
+      margin:8px 0;
+      line-height:1.5;
+      font-size:14px;
+    }
+
+    .erro code{
+      display:inline-block;
+      padding:3px 7px;
+      border-radius:6px;
+      background:rgba(255,255,255,.13);
+      color:#fff;
+    }
+
+    .barra{
+      min-height:70px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:var(--azul);
+    }
+
+    .botao{
+      height:42px;
+      min-width:42px;
+      padding:0 14px;
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:12px;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      font:inherit;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      transition:background .18s ease, transform .18s ease;
+    }
+
+    .botao:hover{background:rgba(255,255,255,.16)}
+    .botao:active{transform:scale(.97)}
+    .botao:disabled{opacity:.35;cursor:not-allowed}
+
+    .contador{
+      min-width:104px;
+      height:42px;
+      padding:0 12px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.14);
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+
+    .rotulo-desktop{display:inline}
+
+    @media (max-width:720px){
+      .topo{min-height:50px}
+      .marca-texto span,
+      .arquivo-atual,
+      .rotulo-desktop{display:none}
+      #seletorPdf{
+        max-width:52vw!important;
+        font-size:12px!important;
+      }
+      .barra{gap:6px}
+      .botao{padding:0 11px}
+      .palco{padding:4px}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="topo">
+      <div class="marca">
+        <div class="marca-barra"></div>
+        <div class="marca-texto">
+          <strong id="tituloDocumento">Biblioteca Corporativa</strong>
+          <span>Lucena Infraestrutura</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <select id="seletorPdf" aria-label="Selecionar documento" style="
+          max-width:320px;
+          height:38px;
+          padding:0 36px 0 12px;
+          border:1px solid rgba(255,255,255,.24);
+          border-radius:10px;
+          background:rgba(255,255,255,.10);
+          color:#fff;
+          font:inherit;
+          font-size:13px;
+          outline:none;
+          cursor:pointer;
+        ">
+          <option value="">Carregando documentos...</option>
+        </select>
+
+        <div class="arquivo-atual" id="arquivoAtual">
+          Localizando o PDF...
+        </div>
+      </div>
+    </header>
+
+    <section class="palco" id="palco">
+      <div id="livro"></div>
+
+      <div class="carregamento" id="carregamento">
+        <div class="carregamento-conteudo">
+          <div class="spinner"></div>
+          <div class="carregamento-titulo">Preparando o livreto</div>
+          <div class="carregamento-mensagem" id="mensagemCarregamento">
+            Localizando o PDF publicado na pasta <strong>/pdf</strong>...
+          </div>
+        </div>
+      </div>
+
+      <div class="erro" id="erro">
+        <h2>Não foi possível abrir o livreto</h2>
+        <p id="mensagemErro"></p>
+        <p>
+          Confirme se existe pelo menos um arquivo PDF na pasta
+          <code>/pdf</code> do repositório.
+        </p>
+      </div>
+    </section>
+
+    <footer class="barra">
+      <button class="botao" id="primeira" title="Primeira página">⏮</button>
+      <button class="botao" id="anterior" title="Página anterior">← <span class="rotulo-desktop">Anterior</span></button>
+      <div class="contador" id="contador">0 / 0</div>
+      <button class="botao" id="proxima" title="Próxima página"><span class="rotulo-desktop">Próxima</span> →</button>
+      <button class="botao" id="ultima" title="Última página">⏭</button>
+      <button class="botao" id="telaCheia" title="Tela cheia">⛶</button>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const GITHUB_USUARIO = "darielsantos-crypto";
+      const GITHUB_REPOSITORIO = "visualizadordepdf";
+      const GITHUB_BRANCH = "main";
+      const GITHUB_PASTA_PDF = "pdf";
+
+      const PDF_PADRAO = "";
+
+      const CONFIG = {
+        escalaRenderizacao: 1.8,
+        maximoPixelsCanvas: 9000000,
+        tempoVirada: 720
+      };
+
+      const carregamento = document.getElementById("carregamento");
+      const mensagemCarregamento = document.getElementById("mensagemCarregamento");
+      const erro = document.getElementById("erro");
+      const mensagemErro = document.getElementById("mensagemErro");
+      const arquivoAtual = document.getElementById("arquivoAtual");
+      const seletorPdf = document.getElementById("seletorPdf");
+      const palco = document.getElementById("palco");
+      const livro = document.getElementById("livro");
+      const contador = document.getElementById("contador");
+
+      const primeira = document.getElementById("primeira");
+      const anterior = document.getElementById("anterior");
+      const proxima = document.getElementById("proxima");
+      const ultima = document.getElementById("ultima");
+      const telaCheia = document.getElementById("telaCheia");
+
+      let pageFlip = null;
+      let totalPaginas = 0;
+      let proporcaoPagina = 1.4142;
+
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      function atualizarMensagem(texto){
+        mensagemCarregamento.textContent = texto;
+      }
+
+      function mostrarErro(texto){
+        carregamento.classList.add("oculto");
+        mensagemErro.textContent = texto;
+        erro.classList.add("visivel");
+        arquivoAtual.textContent = "PDF não localizado";
+      }
+
+      function parametroPdf(){
+        const params = new URLSearchParams(location.search);
+        return params.get("pdf") || "";
+      }
+
+      function nomeSemExtensao(nome){
+        return decodeURIComponent(nome)
+          .replace(/\.pdf$/i, "")
+          .replace(/[_-]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function caminhoPdfLocal(nome){
+        return `${GITHUB_PASTA_PDF}/${nome.split("/").map(encodeURIComponent).join("/")}`;
+      }
+
+      async function listarPdfs(){
+        atualizarMensagem("Consultando os documentos disponíveis...");
+
+        const api =
+          `https://api.github.com/repos/${GITHUB_USUARIO}/` +
+          `${GITHUB_REPOSITORIO}/contents/${GITHUB_PASTA_PDF}` +
+          `?ref=${GITHUB_BRANCH}`;
+
+        const resposta = await fetch(api, {
+          headers: {
+            "Accept": "application/vnd.github+json"
+          },
+          cache: "no-store"
+        });
+
+        if (!resposta.ok){
+          if (resposta.status === 403){
+            throw new Error("O GitHub bloqueou temporariamente a consulta da pasta /pdf por limite de acesso. Aguarde alguns minutos e atualize a página.");
+          }
+          throw new Error(`A pasta /pdf não pôde ser consultada no GitHub (erro ${resposta.status}).`);
         }
-      })();
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+        const itens = await resposta.json();
+
+        const pdfs = itens
+          .filter(item =>
+            item.type === "file" &&
+            /\.pdf$/i.test(item.name)
+          )
+          .sort((a,b) =>
+            a.name.localeCompare(b.name, "pt-BR")
+          );
+
+        if (!pdfs.length){
+          throw new Error("Nenhum arquivo PDF foi encontrado na pasta /pdf.");
+        }
+
+        return pdfs.map(item => ({
+          nome: item.name,
+          url: item.download_url || caminhoPdfLocal(item.name)
+        }));
+      }
+
+      function preencherSeletor(pdfs, selecionado){
+        seletorPdf.innerHTML = "";
+
+        pdfs.forEach(pdf => {
+          const opcao = document.createElement("option");
+          opcao.value = pdf.nome;
+          opcao.textContent = nomeSemExtensao(pdf.nome);
+          opcao.style.color = "#111";
+
+          if (pdf.nome === selecionado){
+            opcao.selected = true;
+          }
+
+          seletorPdf.appendChild(opcao);
+        });
+
+        seletorPdf.disabled = pdfs.length <= 1;
+      }
+
+      async function localizarPdf(){
+        const pdfs = await listarPdfs();
+        const informadoNaUrl = parametroPdf();
+
+        const selecionado =
+          pdfs.find(pdf => pdf.nome === informadoNaUrl) ||
+          (PDF_PADRAO ? pdfs.find(pdf => pdf.nome === PDF_PADRAO) : null) ||
+          pdfs[0];
+
+        preencherSeletor(pdfs, selecionado.nome);
+        return selecionado;
+      }
+
+      function calcularTamanhoLivro(){
+        const larguraPalco = palco.clientWidth;
+        const alturaPalco = palco.clientHeight;
+        const modoMobile = larguraPalco < 760;
+
+        let alturaPagina = Math.max(300, alturaPalco - 12);
+        let larguraPagina = alturaPagina / proporcaoPagina;
+
+        const larguraTotal = modoMobile
+          ? larguraPagina
+          : larguraPagina * 2;
+
+        if (larguraTotal > larguraPalco - 12){
+          larguraPagina =
+            (larguraPalco - 12) / (modoMobile ? 1 : 2);
+
+          alturaPagina =
+            larguraPagina * proporcaoPagina;
+        }
+
+        return {
+          largura: Math.max(220, Math.floor(larguraPagina)),
+          altura: Math.max(300, Math.floor(alturaPagina))
+        };
+      }
+
+      function escalaSegura(viewport){
+        const escalaDesejada = CONFIG.escalaRenderizacao;
+        const pixels =
+          viewport.width *
+          viewport.height *
+          escalaDesejada *
+          escalaDesejada;
+
+        if (pixels <= CONFIG.maximoPixelsCanvas){
+          return escalaDesejada;
+        }
+
+        return Math.sqrt(
+          CONFIG.maximoPixelsCanvas /
+          (viewport.width * viewport.height)
+        );
+      }
+
+      async function renderizarPaginas(pdf){
+        const primeiraPagina = await pdf.getPage(1);
+        const primeiraViewport =
+          primeiraPagina.getViewport({ scale: 1 });
+
+        proporcaoPagina =
+          primeiraViewport.height /
+          primeiraViewport.width;
+
+        const fragmento =
+          document.createDocumentFragment();
+
+        for(
+          let numero = 1;
+          numero <= pdf.numPages;
+          numero++
+        ){
+          atualizarMensagem(
+            `Preparando página ${numero} de ${pdf.numPages}...`
+          );
+
+          const paginaPdf =
+            numero === 1
+              ? primeiraPagina
+              : await pdf.getPage(numero);
+
+          const viewportBase =
+            paginaPdf.getViewport({ scale: 1 });
+
+          const escala =
+            escalaSegura(viewportBase);
+
+          const viewport =
+            paginaPdf.getViewport({ scale: escala });
+
+          const paginaHtml =
+            document.createElement("div");
+
+          paginaHtml.className = "pagina";
+
+          if(
+            numero === 1 ||
+            numero === pdf.numPages
+          ){
+            paginaHtml.dataset.density = "hard";
+          }else{
+            paginaHtml.dataset.density = "soft";
+          }
+
+          const canvas =
+            document.createElement("canvas");
+
+          const contexto =
+            canvas.getContext("2d", {
+              alpha: false
+            });
+
+          canvas.width =
+            Math.floor(viewport.width);
+
+          canvas.height =
+            Math.floor(viewport.height);
+
+          contexto.fillStyle = "#ffffff";
+          contexto.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          await paginaPdf.render({
+            canvasContext: contexto,
+            viewport,
+            background: "#ffffff"
+          }).promise;
+
+          paginaHtml.appendChild(canvas);
+          fragmento.appendChild(paginaHtml);
+
+          if(numero % 3 === 0){
+            await new Promise(resolve =>
+              requestAnimationFrame(resolve)
+            );
+          }
+        }
+
+        livro.replaceChildren(fragmento);
+      }
+
+      function atualizarContador(indice){
+        const paginaAtual =
+          Math.min(totalPaginas, indice + 1);
+
+        contador.textContent =
+          `${paginaAtual} / ${totalPaginas}`;
+
+        primeira.disabled = indice <= 0;
+        anterior.disabled = indice <= 0;
+        proxima.disabled =
+          indice >= totalPaginas - 1;
+        ultima.disabled =
+          indice >= totalPaginas - 1;
+      }
+
+      function iniciarLivreto(){
+        const tamanho =
+          calcularTamanhoLivro();
+
+        pageFlip = new St.PageFlip(livro, {
+          width: tamanho.largura,
+          height: tamanho.altura,
+          size: "stretch",
+          minWidth: 220,
+          maxWidth: tamanho.largura,
+          minHeight: 300,
+          maxHeight: tamanho.altura,
+          showCover: true,
+          usePortrait: true,
+          mobileScrollSupport: false,
+          maxShadowOpacity: 0.35,
+          flippingTime: CONFIG.tempoVirada,
+          drawShadow: true,
+          autoSize: true,
+          clickEventForward: true,
+          useMouseEvents: true,
+          swipeDistance: 22,
+          showPageCorners: true,
+          disableFlipByClick: false
+        });
+
+        pageFlip.loadFromHTML(
+          document.querySelectorAll(".pagina")
+        );
+
+        totalPaginas =
+          pageFlip.getPageCount();
+
+        pageFlip.on("flip", evento => {
+          atualizarContador(evento.data);
+        });
+
+        atualizarContador(0);
+      }
+
+      function configurarControles(){
+        seletorPdf.addEventListener("change", () => {
+          const novaUrl = new URL(window.location.href);
+          novaUrl.searchParams.set("pdf", seletorPdf.value);
+          window.location.href = novaUrl.toString();
+        });
+
+        primeira.addEventListener("click", () => {
+          if(pageFlip) pageFlip.turnToPage(0);
+        });
+
+        anterior.addEventListener("click", () => {
+          if(pageFlip) pageFlip.flipPrev();
+        });
+
+        proxima.addEventListener("click", () => {
+          if(pageFlip) pageFlip.flipNext();
+        });
+
+        ultima.addEventListener("click", () => {
+          if(pageFlip){
+            pageFlip.turnToPage(
+              totalPaginas - 1
+            );
+          }
+        });
+
+        telaCheia.addEventListener("click", async () => {
+          try{
+            if(!document.fullscreenElement){
+              await document.documentElement.requestFullscreen();
+            }else{
+              await document.exitFullscreen();
+            }
+          }catch{}
+        });
+
+        document.addEventListener("keydown", evento => {
+          if(!pageFlip) return;
+
+          if(evento.key === "ArrowLeft"){
+            pageFlip.flipPrev();
+          }
+
+          if(evento.key === "ArrowRight"){
+            pageFlip.flipNext();
+          }
+
+          if(evento.key === "Home"){
+            pageFlip.turnToPage(0);
+          }
+
+          if(evento.key === "End"){
+            pageFlip.turnToPage(
+              totalPaginas - 1
+            );
+          }
+        });
+
+        let timerResize = null;
+
+        window.addEventListener("resize", () => {
+          clearTimeout(timerResize);
+
+          timerResize = setTimeout(() => {
+            if(pageFlip){
+              pageFlip.update();
+            }
+          }, 180);
+        });
+      }
+
+      async function iniciar(){
+        try{
+          configurarControles();
+
+          const pdfEncontrado =
+            await localizarPdf();
+
+          arquivoAtual.textContent =
+            pdfEncontrado.nome;
+
+          const tituloDocumento = document.getElementById("tituloDocumento");
+          if (tituloDocumento){
+            tituloDocumento.textContent = nomeSemExtensao(pdfEncontrado.nome);
+          }
+          document.title = `${nomeSemExtensao(pdfEncontrado.nome)} | Biblioteca Lucena`;
+
+          atualizarMensagem(
+            "Abrindo o arquivo PDF..."
+          );
+
+          const tarefa =
+            pdfjsLib.getDocument({
+              url: pdfEncontrado.url,
+              cMapPacked: true,
+              disableAutoFetch: false,
+              disableStream: false
+            });
+
+          const pdf =
+            await tarefa.promise;
+
+          totalPaginas =
+            pdf.numPages;
+
+          await renderizarPaginas(pdf);
+
+          atualizarMensagem(
+            "Montando o efeito de livreto..."
+          );
+
+          iniciarLivreto();
+
+          carregamento.classList.add("oculto");
+        }catch(error){
+          console.error(error);
+
+          mostrarErro(
+            error?.message ||
+            "O PDF foi localizado, mas não pôde ser processado."
+          );
+        }
+      }
+
+      iniciar();
+    })();
+  </script>
+</body>
 </html>
