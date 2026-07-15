@@ -1,802 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#004883" />
-  <title>Biblioteca Corporativa | Lucena Infraestrutura</title>
-
-  <style>
-    :root{
-      --azul:#004883;
-      --azul-escuro:#00345f;
-      --branco:#ffffff;
-      --vermelho:#ef3340;
-      --sombra:0 28px 70px rgba(0,0,0,.34);
-    }
-
-    *{box-sizing:border-box}
-
-    html,body{
-      width:100%;
-      height:100%;
-      margin:0;
-      overflow:hidden;
-      background:var(--azul);
-      font-family:Arial,Helvetica,sans-serif;
-    }
-
-    body{
-      color:#fff;
-      user-select:none;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    .app{
-      width:100%;
-      height:100%;
-      min-height:100dvh;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      background:var(--azul);
-    }
-
-    .topo{
-      min-height:58px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:10px clamp(12px,3vw,28px);
-      background:var(--azul);
-    }
-
-    .marca{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .marca-barra{
-      width:8px;
-      height:30px;
-      border-radius:10px;
-      background:var(--vermelho);
-      flex:0 0 auto;
-    }
-
-    .marca-texto{
-      min-width:0;
-      line-height:1.05;
-    }
-
-    .marca-texto strong{
-      display:block;
-      font-size:clamp(14px,2vw,18px);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .marca-texto span{
-      display:block;
-      margin-top:4px;
-      font-size:11px;
-      opacity:.75;
-    }
-
-    .arquivo-atual{
-      max-width:42vw;
-      font-size:12px;
-      opacity:.82;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      text-align:right;
-    }
-
-    .palco{
-      position:relative;
-      min-height:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      padding:8px clamp(6px,2vw,22px);
-      background:var(--azul);
-    }
-
-    #livro{
-      filter:drop-shadow(0 24px 28px rgba(0,0,0,.34));
-    }
-
-    .pagina{
-      background:#fff;
-      overflow:hidden;
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
-    }
-
-    .pagina canvas{
-      width:100%;
-      height:100%;
-      display:block;
-      background:#fff;
-    }
-
-    .carregamento{
-      position:absolute;
-      inset:0;
-      z-index:20;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:var(--azul);
-      transition:opacity .25s ease, visibility .25s ease;
-    }
-
-    .carregamento.oculto{
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-    }
-
-    .carregamento-conteudo{
-      width:min(440px,88vw);
-      text-align:center;
-    }
-
-    .spinner{
-      width:48px;
-      height:48px;
-      margin:0 auto 18px;
-      border:4px solid rgba(255,255,255,.25);
-      border-top-color:#fff;
-      border-radius:50%;
-      animation:girar .8s linear infinite;
-    }
-
-    @keyframes girar{
-      to{transform:rotate(360deg)}
-    }
-
-    .carregamento-titulo{
-      font-size:19px;
-      font-weight:700;
-      margin-bottom:8px;
-    }
-
-    .carregamento-mensagem{
-      font-size:13px;
-      line-height:1.45;
-      opacity:.82;
-    }
-
-    .erro{
-      display:none;
-      position:absolute;
-      z-index:30;
-      width:min(660px,92vw);
-      padding:26px;
-      border-radius:18px;
-      background:rgba(0,39,73,.98);
-      box-shadow:var(--sombra);
-      text-align:center;
-    }
-
-    .erro.visivel{display:block}
-
-    .erro h2{
-      margin:0 0 12px;
-      font-size:22px;
-    }
-
-    .erro p{
-      margin:8px 0;
-      line-height:1.5;
-      font-size:14px;
-    }
-
-    .erro code{
-      display:inline-block;
-      padding:3px 7px;
-      border-radius:6px;
-      background:rgba(255,255,255,.13);
-      color:#fff;
-    }
-
-    .barra{
-      min-height:70px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      background:var(--azul);
-    }
-
-    .botao{
-      height:42px;
-      min-width:42px;
-      padding:0 14px;
-      border:1px solid rgba(255,255,255,.22);
-      border-radius:12px;
-      background:rgba(255,255,255,.08);
-      color:#fff;
-      font:inherit;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      transition:background .18s ease, transform .18s ease;
-    }
-
-    .botao:hover{background:rgba(255,255,255,.16)}
-    .botao:active{transform:scale(.97)}
-    .botao:disabled{opacity:.35;cursor:not-allowed}
-
-    .contador{
-      min-width:104px;
-      height:42px;
-      padding:0 12px;
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(0,0,0,.14);
-      font-size:13px;
-      font-weight:700;
-      letter-spacing:.02em;
-    }
-
-    .rotulo-desktop{display:inline}
-
-    @media (max-width:720px){
-      .topo{min-height:50px}
-      .marca-texto span,
-      .arquivo-atual,
-      .rotulo-desktop{display:none}
-      #seletorPdf{
-        max-width:52vw!important;
-        font-size:12px!important;
-      }
-      .barra{gap:6px}
-      .botao{padding:0 11px}
-      .palco{padding:4px}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#004883">
+<title>Biblioteca Corporativa | Lucena Infraestrutura</title>
+<style>
+:root{--blue:#004883;--stage:#565656;--side:300px;--top:64px;--bottom:64px;--border:rgba(255,255,255,.20)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:var(--stage);color:#fff}button,input{font:inherit}button{border:0}svg{display:block}
+.app{width:100%;height:100%;display:grid;grid-template-columns:var(--side) minmax(0,1fr);transition:grid-template-columns .22s ease;background:var(--stage)}.app.collapsed{grid-template-columns:0 minmax(0,1fr)}
+.sidebar{min-width:0;overflow:hidden;background:var(--blue);border-right:1px solid var(--border);z-index:50}.sidebar-inner{width:var(--side);height:100%;display:grid;grid-template-rows:70px 64px minmax(0,1fr)}
+.side-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px}.brand{display:flex;align-items:center;gap:10px;min-width:0;font-size:18px;font-weight:800}.brand span{white-space:nowrap}.side-actions{display:flex;align-items:center;gap:4px}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:transparent;color:#fff;cursor:pointer;opacity:.82}.icon-btn:hover{background:rgba(255,255,255,.12);opacity:1}
+.filter{padding:0 13px 12px}.filter-box{height:42px;display:flex;align-items:center;gap:9px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.10)}.filter-box input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font-size:14px}.filter-box input::placeholder{color:rgba(255,255,255,.63)}
+.doc-list{overflow:auto;padding:5px 8px 18px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}.doc-item{width:100%;min-width:0;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center;padding:12px 13px;border-radius:14px;background:transparent;color:rgba(255,255,255,.78);text-align:left;cursor:pointer;margin-bottom:5px}.doc-item:hover{background:rgba(255,255,255,.10);color:#fff}.doc-item.active{background:#fff;color:var(--blue);box-shadow:0 9px 24px rgba(0,0,0,.24)}.doc-icon{width:34px;height:42px;display:grid;place-items:center;color:currentColor}.doc-copy{display:block;min-width:0;overflow:hidden}.doc-name{display:block;min-width:0;font-size:14px;font-weight:800;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:currentColor}.doc-size{display:block;margin-top:4px;font-size:11px;font-weight:500;color:currentColor;opacity:.62}.empty-list{padding:18px 12px;font-size:13px;opacity:.72}
+.viewer{position:relative;min-width:0;min-height:0;display:grid;grid-template-rows:var(--top) minmax(0,1fr) var(--bottom);background:var(--stage)}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px 8px 18px;background:var(--blue);border-bottom:1px solid var(--border);z-index:20}.title{min-width:0;max-width:42vw;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.actions{display:flex;align-items:center;gap:8px;min-width:0}.segmented{display:flex;padding:3px;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.10)}.segmented button{height:40px;padding:0 15px;display:flex;align-items:center;gap:7px;border-radius:9px;background:transparent;color:rgba(255,255,255,.80);font-weight:800;cursor:pointer}.segmented button.active{background:#fff;color:var(--blue);box-shadow:0 0 0 2px rgba(0,0,0,.75)}.top-btn{height:46px;padding:0 15px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800}.top-btn:hover{background:rgba(255,255,255,.15)}.top-btn.square{width:48px;padding:0}.menu-tab{position:absolute;left:0;top:11px;z-index:60;width:44px;height:44px;border-radius:0 12px 12px 0;background:var(--blue);color:#fff;cursor:pointer;display:none;place-items:center;box-shadow:5px 0 18px rgba(0,0,0,.25)}.app.collapsed .menu-tab{display:grid}
+.stage{position:relative;min-width:0;min-height:0;overflow:auto;background:var(--stage);padding:18px;scrollbar-color:rgba(255,255,255,.45) #444}.stage-center{min-width:100%;min-height:100%;display:flex;align-items:center;justify-content:center}#livro{filter:drop-shadow(0 22px 28px rgba(0,0,0,.34))}.pagina{background:#fff;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}.pagina canvas{width:100%;height:100%;display:block;background:#fff}.doc-stack{width:100%;display:flex;flex-direction:column;align-items:center;gap:20px;padding:4px 0 30px}.doc-page{background:#fff;box-shadow:0 14px 34px rgba(0,0,0,.50)}.doc-page canvas{width:100%;height:100%;display:block}
+.toolbar{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--blue);border-top:1px solid var(--border);z-index:20}.tool{height:40px;min-width:40px;padding:0 11px;display:grid;place-items:center;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer}.tool:hover{background:rgba(255,255,255,.15)}.tool:disabled{opacity:.34;cursor:not-allowed}.counter{min-width:92px;text-align:center;font-size:12px;font-weight:800}.zoom{min-width:48px;text-align:center;font-size:11px;opacity:.75}
+.loader{position:absolute;inset:0;z-index:70;display:grid;place-items:center;background:var(--stage);transition:.2s}.loader.hide{opacity:0;visibility:hidden;pointer-events:none}.load{text-align:center;padding:20px}.spinner{width:46px;height:46px;margin:0 auto 15px;border:4px solid rgba(255,255,255,.24);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.load b{display:block;font-size:17px}.load span{display:block;margin-top:7px;font-size:12px;opacity:.75}
+.error{display:none;position:absolute;z-index:80;left:50%;top:50%;transform:translate(-50%,-50%);width:min(580px,90vw);padding:24px;border-radius:16px;background:var(--blue);box-shadow:0 24px 60px rgba(0,0,0,.50);text-align:center}.error.show{display:block}.error h2{margin:0 0 10px}.error p{margin:0;font-size:13px;line-height:1.45}
+.search-panel{display:none;position:absolute;top:72px;right:14px;z-index:90;width:min(410px,calc(100vw - 28px));max-height:70vh;background:#f8fafc;color:#173044;border-radius:14px;box-shadow:0 24px 65px rgba(0,0,0,.55);overflow:hidden}.search-panel.open{display:grid;grid-template-rows:auto minmax(0,1fr)}.search-head{padding:10px;border-bottom:1px solid #d9e1e6}.search-head input{width:100%;height:42px;border:1px solid #c9d6df;border-radius:9px;padding:0 12px;outline:0}.results{overflow:auto;padding:7px}.result{width:100%;padding:10px;border-radius:9px;background:transparent;color:#173044;text-align:left;cursor:pointer}.result:hover{background:#e9f1f6}.result b{display:block;color:var(--blue);margin-bottom:4px}.result span{font-size:12px;line-height:1.35;color:#586b7b}.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:45}
+@media(max-width:980px){:root{--side:min(320px,88vw)}.app,.app.collapsed{grid-template-columns:1fr}.sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);transform:translateX(-102%);transition:transform .22s ease;box-shadow:18px 0 40px rgba(0,0,0,.38)}.sidebar.open{transform:translateX(0)}.overlay.show{display:block}.menu-tab,.app.collapsed .menu-tab{display:grid}.topbar{padding-left:58px}.title{max-width:28vw}}
+@media(max-width:720px){:root{--top:58px;--bottom:62px}.topbar{padding-right:7px;gap:5px}.title{display:none}.actions{width:100%;justify-content:flex-end;gap:5px}.segmented{flex:1;max-width:260px}.segmented button{flex:1;justify-content:center;padding:0 8px;font-size:12px}.top-btn{width:44px;height:44px;padding:0;font-size:0}.top-btn span{font-size:20px}.stage{padding:7px}.toolbar{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding-left:8px;padding-right:8px}.toolbar::-webkit-scrollbar{display:none}.toolbar .optional{display:none}.counter{min-width:78px}.search-panel{top:66px;right:8px;width:calc(100vw - 16px);max-height:62vh}}
+@media(max-width:430px){.segmented{max-width:none}.segmented button{font-size:11px;gap:5px}.top-btn.square:last-child{display:none}.doc-item{padding:12px 11px}}
+</style>
 </head>
-
 <body>
-  <main class="app">
-    <header class="topo">
-      <div class="marca">
-        <div class="marca-barra"></div>
-        <div class="marca-texto">
-          <strong id="tituloDocumento">Biblioteca Corporativa</strong>
-          <span>Lucena Infraestrutura</span>
+<div class="overlay" id="overlay"></div>
+<main class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="side-head">
+        <div class="brand"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg><span>Biblioteca</span></div>
+        <div class="side-actions">
+          <button class="icon-btn" id="refreshDocs" title="Atualizar documentos" aria-label="Atualizar documentos"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"/></svg></button>
+          <button class="icon-btn" id="collapseMenu" title="Recolher menu" aria-label="Recolher menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="m15 9-3 3 3 3"/></svg></button>
         </div>
       </div>
+      <div class="filter"><div class="filter-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="docFilter" type="search" placeholder="Buscar documentos..."></div></div>
+      <nav class="doc-list" id="docList"></nav>
+    </div>
+  </aside>
 
-      <div style="display:flex;align-items:center;gap:10px;min-width:0">
-        <select id="seletorPdf" aria-label="Selecionar documento" style="
-          max-width:320px;
-          height:38px;
-          padding:0 36px 0 12px;
-          border:1px solid rgba(255,255,255,.24);
-          border-radius:10px;
-          background:rgba(255,255,255,.10);
-          color:#fff;
-          font:inherit;
-          font-size:13px;
-          outline:none;
-          cursor:pointer;
-        ">
-          <option value="">Carregando documentos...</option>
-        </select>
-
-        <div class="arquivo-atual" id="arquivoAtual">
-          Localizando o PDF...
+  <section class="viewer">
+    <button class="menu-tab" id="openMenu" title="Abrir biblioteca" aria-label="Abrir biblioteca"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <header class="topbar">
+      <div class="title" id="title">Biblioteca Corporativa</div>
+      <div class="actions">
+        <div class="segmented">
+          <button id="bookMode" class="active"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg> Livreto</button>
+          <button id="documentMode"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg> Documento</button>
         </div>
+        <button class="top-btn" id="searchButton"><span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span> Pesquisar</button>
+        <button class="top-btn square" id="downloadButton" title="Baixar PDF" aria-label="Baixar PDF"><span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span></button>
+        <button class="top-btn square" id="fullscreenButton" title="Tela cheia" aria-label="Tela cheia"><span><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></span></button>
       </div>
     </header>
 
-    <section class="palco" id="palco">
-      <div id="livro"></div>
-
-      <div class="carregamento" id="carregamento">
-        <div class="carregamento-conteudo">
-          <div class="spinner"></div>
-          <div class="carregamento-titulo">Preparando o livreto</div>
-          <div class="carregamento-mensagem" id="mensagemCarregamento">
-            Localizando o PDF publicado na pasta <strong>/pdf</strong>...
-          </div>
-        </div>
-      </div>
-
-      <div class="erro" id="erro">
-        <h2>Não foi possível abrir o livreto</h2>
-        <p id="mensagemErro"></p>
-        <p>
-          Confirme se existe pelo menos um arquivo PDF na pasta
-          <code>/pdf</code> do repositório.
-        </p>
+    <section class="stage" id="stage">
+      <div class="stage-center" id="stageCenter"><div id="livro"></div></div>
+      <div class="loader" id="loader"><div class="load"><div class="spinner"></div><b>Carregando documento</b><span id="loaderText">Localizando os PDFs...</span></div></div>
+      <div class="error" id="error"><h2>Não foi possível abrir</h2><p id="errorText"></p></div>
+      <div class="search-panel" id="searchPanel">
+        <div class="search-head"><input id="textSearch" type="search" placeholder="Pesquisar palavra ou expressão..."></div>
+        <div class="results" id="results"></div>
       </div>
     </section>
 
-    <footer class="barra">
-      <button class="botao" id="primeira" title="Primeira página">⏮</button>
-      <button class="botao" id="anterior" title="Página anterior">← <span class="rotulo-desktop">Anterior</span></button>
-      <div class="contador" id="contador">0 / 0</div>
-      <button class="botao" id="proxima" title="Próxima página"><span class="rotulo-desktop">Próxima</span> →</button>
-      <button class="botao" id="ultima" title="Última página">⏭</button>
-      <button class="botao" id="telaCheia" title="Tela cheia">⛶</button>
+    <footer class="toolbar">
+      <button class="tool optional" id="firstButton">⏮</button>
+      <button class="tool" id="previousButton">←</button>
+      <div class="counter" id="counter">0 / 0</div>
+      <button class="tool" id="nextButton">→</button>
+      <button class="tool optional" id="lastButton">⏭</button>
+      <button class="tool" id="zoomOutButton">−</button>
+      <div class="zoom" id="zoomLabel">100%</div>
+      <button class="tool" id="zoomInButton">＋</button>
+      <button class="tool optional" id="fitButton">Ajustar</button>
     </footer>
-  </main>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const GITHUB_USUARIO = "darielsantos-crypto";
-      const GITHUB_REPOSITORIO = "visualizadordepdf";
-      const GITHUB_BRANCH = "main";
-      const GITHUB_PASTA_PDF = "pdf";
-
-      const PDF_PADRAO = "";
-
-      const CONFIG = {
-        escalaRenderizacao: 1.8,
-        maximoPixelsCanvas: 9000000,
-        tempoVirada: 720
-      };
-
-      const carregamento = document.getElementById("carregamento");
-      const mensagemCarregamento = document.getElementById("mensagemCarregamento");
-      const erro = document.getElementById("erro");
-      const mensagemErro = document.getElementById("mensagemErro");
-      const arquivoAtual = document.getElementById("arquivoAtual");
-      const seletorPdf = document.getElementById("seletorPdf");
-      const palco = document.getElementById("palco");
-      const livro = document.getElementById("livro");
-      const contador = document.getElementById("contador");
-
-      const primeira = document.getElementById("primeira");
-      const anterior = document.getElementById("anterior");
-      const proxima = document.getElementById("proxima");
-      const ultima = document.getElementById("ultima");
-      const telaCheia = document.getElementById("telaCheia");
-
-      let pageFlip = null;
-      let totalPaginas = 0;
-      let proporcaoPagina = 1.4142;
-
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-      function atualizarMensagem(texto){
-        mensagemCarregamento.textContent = texto;
-      }
-
-      function mostrarErro(texto){
-        carregamento.classList.add("oculto");
-        mensagemErro.textContent = texto;
-        erro.classList.add("visivel");
-        arquivoAtual.textContent = "PDF não localizado";
-      }
-
-      function parametroPdf(){
-        const params = new URLSearchParams(location.search);
-        return params.get("pdf") || "";
-      }
-
-      function nomeSemExtensao(nome){
-        return decodeURIComponent(nome)
-          .replace(/\.pdf$/i, "")
-          .replace(/[_-]+/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-      }
-
-      function caminhoPdfLocal(nome){
-        return `${GITHUB_PASTA_PDF}/${nome.split("/").map(encodeURIComponent).join("/")}`;
-      }
-
-      async function listarPdfs(){
-        atualizarMensagem("Consultando os documentos disponíveis...");
-
-        const api =
-          `https://api.github.com/repos/${GITHUB_USUARIO}/` +
-          `${GITHUB_REPOSITORIO}/contents/${GITHUB_PASTA_PDF}` +
-          `?ref=${GITHUB_BRANCH}`;
-
-        const resposta = await fetch(api, {
-          headers: {
-            "Accept": "application/vnd.github+json"
-          },
-          cache: "no-store"
-        });
-
-        if (!resposta.ok){
-          if (resposta.status === 403){
-            throw new Error("O GitHub bloqueou temporariamente a consulta da pasta /pdf por limite de acesso. Aguarde alguns minutos e atualize a página.");
-          }
-          throw new Error(`A pasta /pdf não pôde ser consultada no GitHub (erro ${resposta.status}).`);
-        }
-
-        const itens = await resposta.json();
-
-        const pdfs = itens
-          .filter(item =>
-            item.type === "file" &&
-            /\.pdf$/i.test(item.name)
-          )
-          .sort((a,b) =>
-            a.name.localeCompare(b.name, "pt-BR")
-          );
-
-        if (!pdfs.length){
-          throw new Error("Nenhum arquivo PDF foi encontrado na pasta /pdf.");
-        }
-
-        return pdfs.map(item => ({
-          nome: item.name,
-          url: item.download_url || caminhoPdfLocal(item.name)
-        }));
-      }
-
-      function preencherSeletor(pdfs, selecionado){
-        seletorPdf.innerHTML = "";
-
-        pdfs.forEach(pdf => {
-          const opcao = document.createElement("option");
-          opcao.value = pdf.nome;
-          opcao.textContent = nomeSemExtensao(pdf.nome);
-          opcao.style.color = "#111";
-
-          if (pdf.nome === selecionado){
-            opcao.selected = true;
-          }
-
-          seletorPdf.appendChild(opcao);
-        });
-
-        seletorPdf.disabled = pdfs.length <= 1;
-      }
-
-      async function localizarPdf(){
-        const pdfs = await listarPdfs();
-        const informadoNaUrl = parametroPdf();
-
-        const selecionado =
-          pdfs.find(pdf => pdf.nome === informadoNaUrl) ||
-          (PDF_PADRAO ? pdfs.find(pdf => pdf.nome === PDF_PADRAO) : null) ||
-          pdfs[0];
-
-        preencherSeletor(pdfs, selecionado.nome);
-        return selecionado;
-      }
-
-      function calcularTamanhoLivro(){
-        const larguraPalco = palco.clientWidth;
-        const alturaPalco = palco.clientHeight;
-        const modoMobile = larguraPalco < 760;
-
-        let alturaPagina = Math.max(300, alturaPalco - 12);
-        let larguraPagina = alturaPagina / proporcaoPagina;
-
-        const larguraTotal = modoMobile
-          ? larguraPagina
-          : larguraPagina * 2;
-
-        if (larguraTotal > larguraPalco - 12){
-          larguraPagina =
-            (larguraPalco - 12) / (modoMobile ? 1 : 2);
-
-          alturaPagina =
-            larguraPagina * proporcaoPagina;
-        }
-
-        return {
-          largura: Math.max(220, Math.floor(larguraPagina)),
-          altura: Math.max(300, Math.floor(alturaPagina))
-        };
-      }
-
-      function escalaSegura(viewport){
-        const escalaDesejada = CONFIG.escalaRenderizacao;
-        const pixels =
-          viewport.width *
-          viewport.height *
-          escalaDesejada *
-          escalaDesejada;
-
-        if (pixels <= CONFIG.maximoPixelsCanvas){
-          return escalaDesejada;
-        }
-
-        return Math.sqrt(
-          CONFIG.maximoPixelsCanvas /
-          (viewport.width * viewport.height)
-        );
-      }
-
-      async function renderizarPaginas(pdf){
-        const primeiraPagina = await pdf.getPage(1);
-        const primeiraViewport =
-          primeiraPagina.getViewport({ scale: 1 });
-
-        proporcaoPagina =
-          primeiraViewport.height /
-          primeiraViewport.width;
-
-        const fragmento =
-          document.createDocumentFragment();
-
-        for(
-          let numero = 1;
-          numero <= pdf.numPages;
-          numero++
-        ){
-          atualizarMensagem(
-            `Preparando página ${numero} de ${pdf.numPages}...`
-          );
-
-          const paginaPdf =
-            numero === 1
-              ? primeiraPagina
-              : await pdf.getPage(numero);
-
-          const viewportBase =
-            paginaPdf.getViewport({ scale: 1 });
-
-          const escala =
-            escalaSegura(viewportBase);
-
-          const viewport =
-            paginaPdf.getViewport({ scale: escala });
-
-          const paginaHtml =
-            document.createElement("div");
-
-          paginaHtml.className = "pagina";
-
-          if(
-            numero === 1 ||
-            numero === pdf.numPages
-          ){
-            paginaHtml.dataset.density = "hard";
-          }else{
-            paginaHtml.dataset.density = "soft";
-          }
-
-          const canvas =
-            document.createElement("canvas");
-
-          const contexto =
-            canvas.getContext("2d", {
-              alpha: false
-            });
-
-          canvas.width =
-            Math.floor(viewport.width);
-
-          canvas.height =
-            Math.floor(viewport.height);
-
-          contexto.fillStyle = "#ffffff";
-          contexto.fillRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
-          await paginaPdf.render({
-            canvasContext: contexto,
-            viewport,
-            background: "#ffffff"
-          }).promise;
-
-          paginaHtml.appendChild(canvas);
-          fragmento.appendChild(paginaHtml);
-
-          if(numero % 3 === 0){
-            await new Promise(resolve =>
-              requestAnimationFrame(resolve)
-            );
-          }
-        }
-
-        livro.replaceChildren(fragmento);
-      }
-
-      function atualizarContador(indice){
-        const paginaAtual =
-          Math.min(totalPaginas, indice + 1);
-
-        contador.textContent =
-          `${paginaAtual} / ${totalPaginas}`;
-
-        primeira.disabled = indice <= 0;
-        anterior.disabled = indice <= 0;
-        proxima.disabled =
-          indice >= totalPaginas - 1;
-        ultima.disabled =
-          indice >= totalPaginas - 1;
-      }
-
-      function iniciarLivreto(){
-        const tamanho =
-          calcularTamanhoLivro();
-
-        pageFlip = new St.PageFlip(livro, {
-          width: tamanho.largura,
-          height: tamanho.altura,
-          size: "stretch",
-          minWidth: 220,
-          maxWidth: tamanho.largura,
-          minHeight: 300,
-          maxHeight: tamanho.altura,
-          showCover: true,
-          usePortrait: true,
-          mobileScrollSupport: false,
-          maxShadowOpacity: 0.35,
-          flippingTime: CONFIG.tempoVirada,
-          drawShadow: true,
-          autoSize: true,
-          clickEventForward: true,
-          useMouseEvents: true,
-          swipeDistance: 22,
-          showPageCorners: true,
-          disableFlipByClick: false
-        });
-
-        pageFlip.loadFromHTML(
-          document.querySelectorAll(".pagina")
-        );
-
-        totalPaginas =
-          pageFlip.getPageCount();
-
-        pageFlip.on("flip", evento => {
-          atualizarContador(evento.data);
-        });
-
-        atualizarContador(0);
-      }
-
-      function configurarControles(){
-        seletorPdf.addEventListener("change", () => {
-          const novaUrl = new URL(window.location.href);
-          novaUrl.searchParams.set("pdf", seletorPdf.value);
-          window.location.href = novaUrl.toString();
-        });
-
-        primeira.addEventListener("click", () => {
-          if(pageFlip) pageFlip.turnToPage(0);
-        });
-
-        anterior.addEventListener("click", () => {
-          if(pageFlip) pageFlip.flipPrev();
-        });
-
-        proxima.addEventListener("click", () => {
-          if(pageFlip) pageFlip.flipNext();
-        });
-
-        ultima.addEventListener("click", () => {
-          if(pageFlip){
-            pageFlip.turnToPage(
-              totalPaginas - 1
-            );
-          }
-        });
-
-        telaCheia.addEventListener("click", async () => {
-          try{
-            if(!document.fullscreenElement){
-              await document.documentElement.requestFullscreen();
-            }else{
-              await document.exitFullscreen();
-            }
-          }catch{}
-        });
-
-        document.addEventListener("keydown", evento => {
-          if(!pageFlip) return;
-
-          if(evento.key === "ArrowLeft"){
-            pageFlip.flipPrev();
-          }
-
-          if(evento.key === "ArrowRight"){
-            pageFlip.flipNext();
-          }
-
-          if(evento.key === "Home"){
-            pageFlip.turnToPage(0);
-          }
-
-          if(evento.key === "End"){
-            pageFlip.turnToPage(
-              totalPaginas - 1
-            );
-          }
-        });
-
-        let timerResize = null;
-
-        window.addEventListener("resize", () => {
-          clearTimeout(timerResize);
-
-          timerResize = setTimeout(() => {
-            if(pageFlip){
-              pageFlip.update();
-            }
-          }, 180);
-        });
-      }
-
-      async function iniciar(){
-        try{
-          configurarControles();
-
-          const pdfEncontrado =
-            await localizarPdf();
-
-          arquivoAtual.textContent =
-            pdfEncontrado.nome;
-
-          const tituloDocumento = document.getElementById("tituloDocumento");
-          if (tituloDocumento){
-            tituloDocumento.textContent = nomeSemExtensao(pdfEncontrado.nome);
-          }
-          document.title = `${nomeSemExtensao(pdfEncontrado.nome)} | Biblioteca Lucena`;
-
-          atualizarMensagem(
-            "Abrindo o arquivo PDF..."
-          );
-
-          const tarefa =
-            pdfjsLib.getDocument({
-              url: pdfEncontrado.url,
-              cMapPacked: true,
-              disableAutoFetch: false,
-              disableStream: false
-            });
-
-          const pdf =
-            await tarefa.promise;
-
-          totalPaginas =
-            pdf.numPages;
-
-          await renderizarPaginas(pdf);
-
-          atualizarMensagem(
-            "Montando o efeito de livreto..."
-          );
-
-          iniciarLivreto();
-
-          carregamento.classList.add("oculto");
-        }catch(error){
-          console.error(error);
-
-          mostrarErro(
-            error?.message ||
-            "O PDF foi localizado, mas não pôde ser processado."
-          );
-        }
-      }
-
-      iniciar();
-    })();
-  </script>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+(()=>{"use strict";
+const OWNER="darielsantos-crypto",REPO="visualizadordepdf",BRANCH="main",FOLDER="pdf";
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const $=id=>document.getElementById(id);
+const E={app:$("app"),sidebar:$("sidebar"),overlay:$("overlay"),openMenu:$("openMenu"),collapseMenu:$("collapseMenu"),refreshDocs:$("refreshDocs"),docFilter:$("docFilter"),docList:$("docList"),title:$("title"),bookMode:$("bookMode"),documentMode:$("documentMode"),searchButton:$("searchButton"),downloadButton:$("downloadButton"),fullscreenButton:$("fullscreenButton"),stage:$("stage"),stageCenter:$("stageCenter"),loader:$("loader"),loaderText:$("loaderText"),error:$("error"),errorText:$("errorText"),searchPanel:$("searchPanel"),textSearch:$("textSearch"),results:$("results"),firstButton:$("firstButton"),previousButton:$("previousButton"),counter:$("counter"),nextButton:$("nextButton"),lastButton:$("lastButton"),zoomOutButton:$("zoomOutButton"),zoomLabel:$("zoomLabel"),zoomInButton:$("zoomInButton"),fitButton:$("fitButton")};
+let docs=[],active=null,pdf=null,pageFlip=null,total=0,current=0,mode="book",zoom=1,ratio=1.4142,pageTexts=[],loadId=0,resizeTimer=null;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+const clean=n=>decodeURIComponent(n).replace(/\.pdf$/i,"").replace(/[_-]+/g," ").replace(/\s+/g," ").trim();
+const fmt=n=>{if(!Number.isFinite(n))return "";const mb=n/1048576;return mb>=1?mb.toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB"};
+function loading(m){E.loaderText.textContent=m;E.loader.classList.remove("hide");E.error.classList.remove("show")}
+function hideLoading(){E.loader.classList.add("hide")}
+function fail(m){E.errorText.textContent=m;E.error.classList.add("show");hideLoading()}
+function setMenu(open){if(innerWidth<=900){E.sidebar.classList.toggle("open",open);E.overlay.classList.toggle("show",open)}else E.app.classList.toggle("collapsed",!open)}
+async function listDocs(force=false){
+  const key="lucena-docs-stable-v1";
+  if(!force){try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.time<300000)docs=c.items||[]}catch{}}
+  try{
+    const r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${BRANCH}`,{headers:{Accept:"application/vnd.github+json"},cache:"no-store"});
+    if(!r.ok)throw Error(`GitHub respondeu com erro ${r.status}.`);
+    const items=await r.json();
+    docs=items.filter(x=>x.type==="file"&&/\.pdf$/i.test(x.name)).map(x=>({name:x.name,title:clean(x.name),url:x.download_url,size:x.size||0})).sort((a,b)=>a.title.localeCompare(b.title,"pt-BR"));
+    localStorage.setItem(key,JSON.stringify({time:Date.now(),items:docs}));
+  }catch(e){if(!docs.length)throw e}
+  if(!docs.length)throw Error("Nenhum PDF foi encontrado na pasta /pdf.");
+}
+function renderMenu(q=""){
+  q=q.trim().toLowerCase();
+  E.docList.replaceChildren();
+  const filtrados=docs.filter(d=>!q||d.title.toLowerCase().includes(q));
+  filtrados.forEach(d=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="doc-item"+(active&&active.name===d.name?" active":"");
+    b.title=d.title;
+    const icon=document.createElement("span");
+    icon.className="doc-icon";
+    icon.innerHTML=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5"/><path d="M9 12h6M9 16h6"/></svg>`;
+    const copy=document.createElement("span");
+    copy.className="doc-copy";
+    const name=document.createElement("span");
+    name.className="doc-name";
+    name.textContent=d.title||d.name||"Documento PDF";
+    const size=document.createElement("span");
+    size.className="doc-size";
+    size.textContent=fmt(d.size);
+    copy.append(name,size);
+    b.append(icon,copy);
+    b.onclick=()=>openDoc(d);
+    E.docList.appendChild(b);
+  });
+  if(!filtrados.length){
+    const empty=document.createElement("div");
+    empty.className="empty-list";
+    empty.textContent="Nenhum documento encontrado.";
+    E.docList.appendChild(empty);
+  }
+}
+function destroyFlip(){try{if(pageFlip)pageFlip.destroy()}catch{}pageFlip=null}
+function updateCounter(){const p=total?Math.min(total,current+1):0;E.counter.textContent=`${p} / ${total}`;E.firstButton.disabled=current<=0;E.previousButton.disabled=current<=0;E.nextButton.disabled=!total||current>=total-1;E.lastButton.disabled=!total||current>=total-1}
+function pageWidth(){
+  const aw=Math.max(280,E.stage.clientWidth-38),ah=Math.max(300,E.stage.clientHeight-38),mobile=aw<760;
+  let h=ah,w=h/ratio,totalW=mobile?w:w*2;
+  if(totalW>aw){w=aw/(mobile?1:2);h=w*ratio}
+  return Math.max(220,Math.floor(w*zoom));
+}
+function safeScale(v){const desired=1.8,max=9000000,p=v.width*v.height*desired*desired;return p<=max?desired:Math.sqrt(max/(v.width*v.height))}
+async function renderPageCanvas(p,width){
+  const base=p.getViewport({scale:1}),cssScale=width/base.width,css=p.getViewport({scale:cssScale}),renderScale=safeScale(base)*cssScale,rv=p.getViewport({scale:renderScale});
+  const c=document.createElement("canvas");c.width=Math.floor(rv.width);c.height=Math.floor(rv.height);c.style.width=`${css.width}px`;c.style.height=`${css.height}px`;
+  const ctx=c.getContext("2d",{alpha:false});ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);
+  await p.render({canvasContext:ctx,viewport:rv,background:"#fff"}).promise;return {canvas:c,width:css.width,height:css.height}
+}
+async function renderBook(token){
+  destroyFlip();E.stageCenter.innerHTML='<div id="livro"></div>';E.stageCenter.style.alignItems="center";const livro=$("livro"),w=pageWidth(),h=w*ratio,frag=document.createDocumentFragment();
+  for(let i=0;i<total;i++){if(token!==loadId)return;loading(`Preparando página ${i+1} de ${total}...`);const p=await pdf.getPage(i+1),r=await renderPageCanvas(p,w),el=document.createElement("div");el.className="pagina";el.dataset.density=(i===0||i===total-1)?"hard":"soft";el.style.width=`${w}px`;el.style.height=`${h}px`;el.appendChild(r.canvas);frag.appendChild(el);if((i+1)%3===0)await new Promise(requestAnimationFrame)}
+  livro.appendChild(frag);pageFlip=new St.PageFlip(livro,{width:w,height:Math.floor(h),size:"stretch",minWidth:220,maxWidth:w,minHeight:300,maxHeight:Math.floor(h),showCover:true,usePortrait:true,mobileScrollSupport:false,maxShadowOpacity:.3,flippingTime:720,drawShadow:true,autoSize:true,clickEventForward:true,useMouseEvents:true,swipeDistance:22,showPageCorners:true});
+  pageFlip.loadFromHTML(livro.querySelectorAll(".pagina"));total=pageFlip.getPageCount();pageFlip.on("flip",e=>{current=e.data;updateCounter()});pageFlip.turnToPage(Math.min(current,total-1));updateCounter()
+}
+async function renderDocument(token){
+  destroyFlip();E.stageCenter.innerHTML="";E.stageCenter.style.alignItems="flex-start";const stack=document.createElement("div");stack.className="doc-stack";const w=Math.max(250,Math.min(940,E.stage.clientWidth-48)*zoom);
+  for(let i=0;i<total;i++){if(token!==loadId)return;loading(`Preparando página ${i+1} de ${total}...`);const p=await pdf.getPage(i+1),r=await renderPageCanvas(p,w),el=document.createElement("div");el.className="doc-page";el.dataset.index=i;el.style.width=`${r.width}px`;el.style.height=`${r.height}px`;el.appendChild(r.canvas);stack.appendChild(el);if((i+1)%2===0)await new Promise(requestAnimationFrame)}
+  E.stageCenter.appendChild(stack);requestAnimationFrame(()=>goToPage(current,false));updateCounter()
+}
+async function renderCurrent(){if(!pdf)return;const token=loadId;if(mode==="book")await renderBook(token);else await renderDocument(token);if(token===loadId)hideLoading()}
+function goToPage(i,smooth=true){i=Math.max(0,Math.min(total-1,i));current=i;if(mode==="book"){if(pageFlip)pageFlip.turnToPage(i)}else{const el=E.stageCenter.querySelector(`[data-index="${i}"]`);if(el)el.scrollIntoView({behavior:smooth?"smooth":"auto",block:"start"})}updateCounter()}
+function setMode(m){if(mode===m)return;mode=m;E.bookMode.classList.toggle("active",m==="book");E.documentMode.classList.toggle("active",m==="document");E.stage.scrollTo(0,0);loading("Alterando modo de visualização...");renderCurrent()}
+function setZoom(v){zoom=Math.max(.7,Math.min(1.8,v));E.zoomLabel.textContent=Math.round(zoom*100)+"%";loading("Ajustando visualização...");renderCurrent()}
+async function indexText(token){pageTexts=[];for(let i=0;i<total;i++){if(token!==loadId)return;try{const p=await pdf.getPage(i+1),tc=await p.getTextContent();pageTexts[i]=tc.items.map(x=>x.str).join(" ")}catch{pageTexts[i]=""};if(i%3===0)await new Promise(r=>setTimeout(r,0))}}
+async function openDoc(d){
+  const token=++loadId;active=d;current=0;zoom=1;E.zoomLabel.textContent="100%";renderMenu(E.docFilter.value);if(innerWidth<=980)setMenu(false);history.replaceState(null,"",`${location.pathname}?documento=${encodeURIComponent(d.name)}`);E.title.textContent=d.title;document.title=`${d.title} | Biblioteca Lucena`;E.searchPanel.classList.remove("open");E.stageCenter.innerHTML="";total=0;pageTexts=[];updateCounter();loading("Abrindo documento...");
+  try{pdf=await pdfjsLib.getDocument({url:d.url,cMapPacked:true,disableAutoFetch:false,disableStream:false}).promise;if(token!==loadId)return;total=pdf.numPages;const p=await pdf.getPage(1),v=p.getViewport({scale:1});ratio=v.height/v.width;await renderCurrent();indexText(token)}
+  catch(e){console.error(e);fail("O PDF foi localizado, mas não pôde ser aberto: "+(e?.message||"erro desconhecido"))}
+}
+function searchText(q){q=q.trim().toLowerCase();E.results.innerHTML="";if(q.length<2){E.results.innerHTML='<div style="padding:14px;font-size:13px;color:#657786">Digite pelo menos duas letras.</div>';return}let hits=0;pageTexts.forEach((text,i)=>{if(!text)return;const low=text.toLowerCase(),pos=low.indexOf(q);if(pos<0)return;hits++;const ex=text.slice(Math.max(0,pos-55),Math.min(text.length,pos+q.length+95)).replace(/\s+/g," ");const b=document.createElement("button");b.className="result";b.innerHTML=`<b>Página ${i+1}</b><span>...${esc(ex)}...</span>`;b.onclick=()=>{goToPage(i);E.searchPanel.classList.remove("open")};E.results.appendChild(b)});if(!hits)E.results.innerHTML='<div style="padding:14px;font-size:13px;color:#657786">Nenhuma ocorrência encontrada ou o texto ainda está sendo indexado.</div>'}
+E.openMenu.onclick=()=>setMenu(true);E.collapseMenu.onclick=()=>setMenu(false);E.overlay.onclick=()=>setMenu(false);
+E.refreshDocs.onclick=async()=>{loading("Atualizando documentos...");try{await listDocs(true);renderMenu();hideLoading()}catch(e){fail(e.message)}};
+E.docFilter.oninput=e=>renderMenu(e.target.value);
+E.bookMode.onclick=()=>setMode("book");E.documentMode.onclick=()=>setMode("document");
+E.searchButton.onclick=()=>{E.searchPanel.classList.toggle("open");if(E.searchPanel.classList.contains("open"))setTimeout(()=>E.textSearch.focus(),30)};
+E.textSearch.oninput=e=>{clearTimeout(E.textSearch._t);E.textSearch._t=setTimeout(()=>searchText(e.target.value),180)};
+E.downloadButton.onclick=()=>{if(active)window.open(active.url,"_blank")};
+E.fullscreenButton.onclick=async()=>{try{document.fullscreenElement?await document.exitFullscreen():await document.documentElement.requestFullscreen()}catch{}};
+E.firstButton.onclick=()=>goToPage(0);E.previousButton.onclick=()=>mode==="book"&&pageFlip?pageFlip.flipPrev():goToPage(current-1);E.nextButton.onclick=()=>mode==="book"&&pageFlip?pageFlip.flipNext():goToPage(current+1);E.lastButton.onclick=()=>goToPage(total-1);
+E.zoomOutButton.onclick=()=>setZoom(zoom-.1);E.zoomInButton.onclick=()=>setZoom(zoom+.1);E.fitButton.onclick=()=>setZoom(1);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")E.searchPanel.classList.remove("open");if(document.activeElement?.tagName==="INPUT")return;if(e.key==="ArrowLeft")E.previousButton.click();if(e.key==="ArrowRight")E.nextButton.click();if(e.key==="Home")E.firstButton.click();if(e.key==="End")E.lastButton.click()});
+window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(pdf){loading("Ajustando visualização...");renderCurrent()}},200)});
+(async()=>{try{setMenu(innerWidth>980);loading("Localizando documentos...");await listDocs();renderMenu();const q=new URLSearchParams(location.search).get("documento"),d=docs.find(x=>x.name===q)||docs[0];await openDoc(d)}catch(e){console.error(e);fail(e.message||"Não foi possível carregar a biblioteca.")}})();
+})();
+</script>
 </body>
 </html>
